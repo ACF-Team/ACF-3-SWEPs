@@ -255,7 +255,8 @@ function SWEP:ShootBullet(Pos,Dir)
 end
 
 function SWEP:CanPrimaryAttack()
-	if not game.IsDedicated() then self:CallOnClient( "PrimaryAttack" ) end
+	if SERVER and not game.IsDedicated() and not self:GetOwner():IsListenServerHost() then self:CallOnClient("PrimaryAttack")
+	elseif CLIENT and (CurTime() - self.LastShot) < (self.Primary.Delay / 2) then return end
 	if self.Primary.Automatic ~= self:GetNW2Bool("automatic",false) then self.Primary.Automatic = self:GetNW2Bool("automatic",false) end
 
 	if (self:Clip1() <= 0) then

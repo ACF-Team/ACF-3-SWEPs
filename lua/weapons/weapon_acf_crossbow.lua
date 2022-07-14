@@ -31,7 +31,7 @@ SWEP.RecoilMod              = 0.5
 SWEP.Primary.ClipSize       = 1
 SWEP.Primary.DefaultClip    = 1
 SWEP.Primary.Ammo           = "XBowBolt"
-SWEP.Primary.Automatic      = true
+SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 1.25
 
 SWEP.CalcDistance			= 100
