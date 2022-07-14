@@ -228,9 +228,9 @@ function SWEP:GetAimMod()
 	if Owner.IsProne then Prone = Owner:IsProne() end -- Prone mod support
 
 	local VelMod = math.Clamp(Owner:GetAbsVelocity():LengthSqr() / 30000,0,3) * self.MoveBloom
-	local StanceMod = (Prone and Owner:IsOnGround() and 0.1) or ((Owner:Crouching() and Owner:IsOnGround()) and 0.5 or 1)
+	local StanceMod = (Prone and Owner:IsOnGround() and 0.25) or ((Owner:Crouching() and Owner:IsOnGround()) and 0.5 or 1)
 	local OnGround = (Owner:IsOnGround() and 1 or 3)
-	local Bloom = (1 - math.Clamp((CurTime() - LastShot) * self.Recovery,0,1)) * self.Spread * 8 * (1 / (self.Handling / math.min(1,2 * StanceMod)))
+	local Bloom = (1 - math.Clamp((CurTime() - LastShot) * self.Recovery,0,1)) * self.Spread * 8 * (1 / (self.Handling / math.min(1,1.5 * StanceMod)))
 	if SERVER then
 		local Focus = (self:GetNWBool("iron") and (not Owner:IsSprinting()) and self.AimFocused or self.AimUnfocused)
 		return math.min(30,((Focus * StanceMod) + Bloom + VelMod) * OnGround)
@@ -255,6 +255,7 @@ function SWEP:ShootBullet(Pos,Dir)
 end
 
 function SWEP:CanPrimaryAttack()
+	if not game.IsDedicated() then self:CallOnClient( "PrimaryAttack" ) end
 	if self.Primary.Automatic ~= self:GetNW2Bool("automatic",false) then self.Primary.Automatic = self:GetNW2Bool("automatic",false) end
 
 	if (self:Clip1() <= 0) then
