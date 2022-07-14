@@ -405,7 +405,6 @@ function SWEP:CalcDropTable()
 
 	local Valid = true
 	local Bullet = {Flight = Vector(1,0,0) * (self.ACFMuzzleVel * 39.37),Pos = Vector(),pm = BD.ProjMass,DragCoef = BD.DragCoef,Accel = ACF.Gravity}
-	--PrintTable(Bullet)
 
 	Bullet.NextPos = Bullet.Pos
 
@@ -418,7 +417,6 @@ function SWEP:CalcDropTable()
 		Bullet.Pos = Bullet.NextPos
 		Time = Time + CheapTime
 		if (#Targets > 0) and ((Bullet.Pos.x / 39.37) >= Targets[1]) or false then
-			--print("Passed " .. Targets[1] .. "m",Bullet.Pos)
 			DropTable[#DropTable + 1] = {Bullet.Pos,Time,Targets[1]}
 			table.remove(Targets,1)
 		end
@@ -483,7 +481,6 @@ if CLIENT then
 
 		self.RateTime = RealTime()
 		local FinalIronScale = self.IronScale >= 0.75 and ((self.IronScale - 0.75) / 0.25) or 0
-		--print(FinalIronScale)
 		return (self.FOV / (self.Zoom or 1)) * FinalIronScale + (self.FOV * (1 - FinalIronScale))
 	end
 
@@ -770,7 +767,6 @@ if CLIENT then
 					draw.SimpleTextOutlined(DD[3] .. "m, " .. math.Round(DD[2],2) .. "s","DermaDefault",Pos.x - 64,Pos.y,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
 				end
 			elseif self.HasDropCalc and (self.CalcRun == false) then
-				print("calc drop table")
 				self.DropCalc = self:CalcDropTable()
 			end
 			surface.SetDrawColor(Black)
