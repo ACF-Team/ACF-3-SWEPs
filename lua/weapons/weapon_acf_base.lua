@@ -255,8 +255,10 @@ function SWEP:ShootBullet(Pos,Dir)
 end
 
 function SWEP:CanPrimaryAttack()
-	if SERVER and not game.IsDedicated() and not self:GetOwner():IsListenServerHost() then self:CallOnClient("PrimaryAttack")
-	elseif CLIENT and (CurTime() - self.LastShot) < (self.Primary.Delay / 2) then return end
+	if self:GetOwner():IsPlayer() then
+		if SERVER and not game.IsDedicated() and not self:GetOwner():IsListenServerHost() then self:CallOnClient("PrimaryAttack")
+		elseif CLIENT and (CurTime() - self.LastShot) < (self.Primary.Delay / 2) then return end
+	end
 	if self.Primary.Automatic ~= self:GetNW2Bool("automatic",false) then self.Primary.Automatic = self:GetNW2Bool("automatic",false) end
 
 	if (self:Clip1() <= 0) then
@@ -268,6 +270,15 @@ function SWEP:CanPrimaryAttack()
 
 	local Owner = self:GetOwner()
 	if Owner:IsPlayer() and (Owner:IsSprinting() and (Owner:GetAbsVelocity():LengthSqr() > 10000)) then return false end
+
+	-- Calls this hook to see if this gun is allowed to shoot an ACF shell
+	-- There isn't a way for the client to know about this, so we'll just replenish the clientside ammo
+	if SERVER and (hook.Run("ACF_FireShell", self) == false) then
+		self:SetNW2Int("lastammo")
+		self:CallOnClient("ResetAmmo")
+		self:SetNextPrimaryFire(CurTime() + 0.2)
+		return false
+	end
 
 	return true
 end
@@ -285,6 +296,12 @@ function SWEP:PostShot(NumberShots)
 
 	self:TakePrimaryAmmo(NumberShots)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+end
+
+function SWEP:ResetAmmo() -- Only called clientside, to replenish "used" ammo if the server denies an ACF bullet being made
+	self:SetClip1(self:GetNW2Int("lastammo",self:Clip1()))
+	self:SetNextPrimaryFire(CurTime() + 0.2)
+	self:SendWeaponAnim(ACT_VM_IDLE)
 end
 
 function SWEP:SecondaryAttack()
@@ -327,6 +344,8 @@ function SWEP:Deploy()
 
 	self.LastShot = CurTime()
 	if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+
+	self.Owner = self:GetOwner() -- A quick way to match what ACF does for this
 
 	if self.Bullet.Type == "HE" or self.Bullet.Type == "HEAT" then
 		self:SetNW2Float("FillerMass",self.Bullet.FillerMass)
