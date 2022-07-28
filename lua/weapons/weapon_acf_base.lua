@@ -6,7 +6,7 @@ if not ACF then error("ACF is required for this addon to work!") end
 -- TODO: Prone Mod support
 -- TODO: Bipods!
 
-local AmmoTypes = ACF.Classes.AmmoTypes
+local AmmoTypes = ACF.Classes.AmmoTypes:GetEntries()
 
 SWEP.Author                 = "LiddulBOFH"
 SWEP.Base                   = "weapon_base" -- Loads in functions from this weapon base, don't change!
