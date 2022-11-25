@@ -14,7 +14,7 @@ SWEP.ViewModel              = "models/weapons/bar/v_bar.mdl"
 SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
-SWEP.ShotSound				= Sound("Weapon_Thompson.Shoot")
+SWEP.ShotSound				= Sound("Weapon_Bar.Shoot")
 SWEP.WorldModel             = "models/weapons/bar/w_bar.mdl"
 SWEP.HoldType               = "ar2"
 

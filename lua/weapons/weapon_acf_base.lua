@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-local ACF = ACF
-if not ACF then error("ACF is required for this addon to work!") end
-
 -- TODO: Prone Mod support
 -- TODO: Bipods!
 
@@ -461,6 +458,16 @@ if CLIENT then
 	local BGCol = Color(65,65,65)
 	local ScreenBlack = Color(0,0,0,255)
 
+	local SX,SY = ScrW(),ScrH()
+	local Scale = math.max(SX / 1920,1)
+
+	surface.CreateFont("SWEP-HUD-FONT",{
+		font		= "Roboto",
+		size		= math.ceil(13 * Scale),
+		weight		= 500,
+		extended	= true
+	})
+
 	function SWEP:DrawWorldModel(STUDIOFLAG)
 		self:SetColor(White)
 		if not self.CustomWorldModelPos then self:DrawModel() return end
@@ -556,7 +563,6 @@ if CLIENT then
 		else return true end
 	end
 
-	local SX,SY = ScrW(),ScrH()
 	local SM = {x = SX / 2, y = SY / 2}
 	local UU = (SX > SY) and (SY / 12) or (SX / 12)
 	function SWEP:DoDrawCrosshair(x,y)
@@ -768,7 +774,7 @@ if CLIENT then
 				for I = 1, 4 do
 					local Mark = (ShootPos + (FWD * 200 * I * 39.37) + (RGT * 200 * (1 - ((I - 1) / 3))) + (UP * 72)):ToScreen()
 					surface.DrawLine(Mark.x + (Size * 0.05),Mark.y,Mark.x + (Size * 0.05),Mark.y - 12)
-					draw.SimpleTextOutlined((200 * I) .. "m","DermaDefault",Mark.x + (Size * 0.05),Mark.y - 12,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
+					draw.SimpleTextOutlined((200 * I) .. "m","SWEP-HUD-FONT",Mark.x + (Size * 0.05),Mark.y - 12,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
 				end
 
 				surface.DrawLine(Spot100.x + (Size * 0.05),Spot100.y,Spot800.x + (Size * 0.05),Spot800.y)
@@ -785,7 +791,7 @@ if CLIENT then
 					surface.SetDrawColor(White)
 					surface.DrawLine(Pos.x,Pos.y,Pos.x + Scale,Pos.y)
 
-					draw.SimpleTextOutlined(DD[3] .. "m, " .. math.Round(DD[2],2) .. "s","DermaDefault",Pos.x - 64,Pos.y,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
+					draw.SimpleTextOutlined(DD[3] .. "m, " .. math.Round(DD[2],2) .. "s","SWEP-HUD-FONT",Pos.x - 64,Pos.y,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
 				end
 			elseif self.HasDropCalc and (self.CalcRun == false) then
 				self.DropCalc = self:CalcDropTable()
@@ -816,31 +822,32 @@ if CLIENT then
 		draw.NoTexture()
 		local Mags = math.ceil(SpareAmmo / ClipSize)
 		local DrawAmmo = DrawMagazine
-		local AmmoSize = 16
+		local AmmoScale = math.max(SX / 1920,1)
+		local AmmoSize = 16 * AmmoScale
 		if ClipSize == 1 then
 			DrawAmmo = DrawRound
-			AmmoSize = 10
+			AmmoSize = 10 * AmmoScale
 		else
-			draw.SimpleTextOutlined(Ammo .. " / " .. ClipSize,"DermaDefault",SX - 12,SY - 48,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
+			draw.SimpleTextOutlined(Ammo .. " / " .. ClipSize,"SWEP-HUD-FONT",SX - 12,SY - (48 * AmmoScale),White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
 		end
 
 		if self.FiremodeSetting ~= 1 then
-			draw.SimpleTextOutlined(FireModeAlias[self:GetNW2Int("firemode",1)],"DermaDefault",SX - 16,SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
+			draw.SimpleTextOutlined(FireModeAlias[self:GetNW2Int("firemode",1)],"SWEP-HUD-FONT",SX - 16,SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
 		end
 
-		draw.SimpleTextOutlined("AMMO TYPE: " .. self.Primary.Ammo,"DermaDefault",SX - 40 + (self.FiremodeSetting == 1 and 20 or 0),SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
+		draw.SimpleTextOutlined("AMMO TYPE: " .. self.Primary.Ammo,"SWEP-HUD-FONT",SX - 40 + (self.FiremodeSetting == 1 and 20 or 0),SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
 
 		surface.SetDrawColor(SetAmmoColor(AmmoPerc))
-		DrawAmmo(SX - 24,SY - 32,10)
+		DrawAmmo(SX - 24,SY - (32 * AmmoScale),10 * AmmoScale)
 
 		local LastAmmo = (Mags * ClipSize) - SpareAmmo
 		for i = 1, math.min(9,Mags) do
 			if (LastAmmo > 0) and (i == Mags) then surface.SetDrawColor(SetAmmoColor(1 - (LastAmmo / ClipSize))) else surface.SetDrawColor(255,255,255) end
-			DrawAmmo(SX - 24 - (i * AmmoSize),SY - 32,10)
+			DrawAmmo(SX - 24 - (i * AmmoSize),SY - (32 * AmmoScale),10 * AmmoScale)
 		end
 
 		if Mags > 9 then
-			draw.SimpleTextOutlined((Mags - 9) .. "+","DermaDefault",SX - 30 - (9 * AmmoSize),SY - 32,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
+			draw.SimpleTextOutlined((Mags - 9) .. "+","SWEP-HUD-FONT",SX - (30 * AmmoScale) - (9 * AmmoSize),SY - (32 * AmmoScale),White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
 		end
 	end
 end
