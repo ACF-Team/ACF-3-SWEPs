@@ -252,15 +252,21 @@ function SWEP:ShootBullet(Pos,Dir)
 end
 
 function SWEP:CanPrimaryAttack()
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+
+	if not IsFirstTimePredicted() then return false end
 	if self:GetOwner():IsPlayer() then
-		if SERVER and not game.IsDedicated() and not self:GetOwner():IsListenServerHost() then self:CallOnClient("PrimaryAttack")
-		elseif CLIENT and (CurTime() - self.LastShot) < (self.Primary.Delay / 2) then return end
+		if SERVER and game.SinglePlayer() then self:CallOnClient("PrimaryAttack") end
+
+		if CLIENT and (CurTime() - self.LastShot) < self.Primary.Delay then return end
 	end
 	if self.Primary.Automatic ~= self:GetNW2Bool("automatic",false) then self.Primary.Automatic = self:GetNW2Bool("automatic",false) end
 
+	self.LastShot = CurTime()
+	if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+
 	if (self:Clip1() <= 0) then
 		self:EmitSound( "Weapon_Pistol.Empty" )
-		self:SetNextPrimaryFire( CurTime() + 0.2 )
 		self:Reload()
 		return false
 	end
@@ -273,7 +279,6 @@ function SWEP:CanPrimaryAttack()
 	if SERVER and (hook.Run("ACF_FireShell", self) == false) then
 		self:SetNW2Int("lastammo")
 		self:CallOnClient("ResetAmmo")
-		self:SetNextPrimaryFire(CurTime() + 0.2)
 		return false
 	end
 
@@ -286,13 +291,14 @@ end
 
 function SWEP:PostShot(NumberShots)
 	self:EmitSound(self.ShotSound)
-	self:ShootEffects()
 
-	self.LastShot = CurTime()
-	if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+	self:SendWeaponAnim(ACT_VM_IDLE)
+	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+
+	self:GetOwner():MuzzleFlash()
+	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 
 	self:TakePrimaryAmmo(NumberShots)
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 end
 
 function SWEP:ResetAmmo() -- Only called clientside, to replenish "used" ammo if the server denies an ACF bullet being made
@@ -329,12 +335,18 @@ end
 function SWEP:Deploy()
 	if CLIENT then
 		self.FOV = self:GetOwner():GetFOV()
+
+		self:ForceWeaponAnim(ACT_VM_DRAW)
 	else
 		if self.Tracer > 0 then
 			local Col = Color(255,255,255)
 			if self:GetOwner():IsPlayer() then Col = team.GetColor(self:GetOwner():Team()) end
 			self:SetColor(Col)
 		end
+
+		-- Hopefully fixes some weird problem with weapons not "recoiling" as they should
+		self.Primary.Automatic = false
+		timer.Simple(0,function() self.Primary.Automatic = self:GetNW2Bool("automatic",false) end)
 	end
 
 	if self.HasDropCalc then self.DropCalc = self:CalcDropTable() end
@@ -343,6 +355,8 @@ function SWEP:Deploy()
 	if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
 
 	self.Owner = self:GetOwner() -- A quick way to match what ACF does for this
+
+	self:SendWeaponAnim(ACT_VM_DRAW) -- another missing anim
 
 	if self.Bullet.Type == "HE" or self.Bullet.Type == "HEAT" then
 		self:SetNW2Float("FillerMass",self.Bullet.FillerMass)
@@ -517,6 +531,7 @@ if CLIENT then
 		local Zoomed = self:GetNWBool("iron",false) and not (self.TempOut or false)
 		if self.Scope and Zoomed then Sens = (1 / (self.Zoom or 1)) * self.IronScale + (1 - self.IronScale) end
 		if not Sens then Sens = 1 end
+		if Sens == 1 then return nil end -- returning nil actually just leaves the player's default sensitivity
 		return math.Clamp(Sens,0.001,1)
 	end
 

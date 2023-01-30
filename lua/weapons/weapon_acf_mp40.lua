@@ -64,7 +64,7 @@ function SWEP:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
 	local Ply = self:GetOwner()
 
-	if Ply:IsPlayer() then Ply:LagCompensation(true) end
+	
 	local AimMod = self:GetAimMod()
 	local Punch = self:GetPunch()
 
@@ -88,5 +88,5 @@ function SWEP:PrimaryAttack()
 
 	timer.Simple(0.5,function() if (Ply:GetActiveWeapon() == self) and self:GetSequenceName(self:GetSequence()) ~= "reload" then self:SendWeaponAnim(ACT_VM_IDLE) end end)
 
-	if Ply:IsPlayer() then Ply:LagCompensation(false) end
+	
 end
