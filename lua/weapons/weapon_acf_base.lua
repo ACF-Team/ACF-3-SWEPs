@@ -336,7 +336,7 @@ function SWEP:Deploy()
 	if CLIENT then
 		self.FOV = self:GetOwner():GetFOV()
 
-		self:ForceWeaponAnim(ACT_VM_DRAW)
+		self:SendWeaponAnim(ACT_VM_DRAW)
 	else
 		if self.Tracer > 0 then
 			local Col = Color(255,255,255)
