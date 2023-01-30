@@ -262,12 +262,13 @@ function SWEP:CanPrimaryAttack()
 	end
 	if self.Primary.Automatic ~= self:GetNW2Bool("automatic",false) then self.Primary.Automatic = self:GetNW2Bool("automatic",false) end
 
-	self.LastShot = CurTime()
-	if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
-
 	if (self:Clip1() <= 0) then
 		self:EmitSound( "Weapon_Pistol.Empty" )
 		self:Reload()
+
+		self.LastShot = CurTime()
+		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+
 		return false
 	end
 
@@ -279,6 +280,10 @@ function SWEP:CanPrimaryAttack()
 	if SERVER and (hook.Run("ACF_FireShell", self) == false) then
 		self:SetNW2Int("lastammo")
 		self:CallOnClient("ResetAmmo")
+
+		self.LastShot = CurTime()
+		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+
 		return false
 	end
 
@@ -297,6 +302,9 @@ function SWEP:PostShot(NumberShots)
 
 	self:GetOwner():MuzzleFlash()
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
+
+	self.LastShot = CurTime()
+	if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
 
 	self:TakePrimaryAmmo(NumberShots)
 end
@@ -335,8 +343,6 @@ end
 function SWEP:Deploy()
 	if CLIENT then
 		self.FOV = self:GetOwner():GetFOV()
-
-		self:SendWeaponAnim(ACT_VM_DRAW)
 	else
 		if self.Tracer > 0 then
 			local Col = Color(255,255,255)
