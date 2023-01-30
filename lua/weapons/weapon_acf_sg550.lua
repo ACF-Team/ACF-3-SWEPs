@@ -9,7 +9,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_snip_sg550.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_SG550.Single")
+SWEP.ShotSound				= Sound(")weapons/sg550/sg550-1.wav")
 SWEP.WorldModel             = "models/weapons/w_snip_sg550.mdl"
 SWEP.HoldType               = "ar2"
 

@@ -10,7 +10,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_rif_famas.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_FAMAS.Single")
+SWEP.ShotSound				= Sound(")weapons/famas/famas-1.wav")
 SWEP.WorldModel             = "models/weapons/w_rif_famas.mdl"
 SWEP.HoldType               = "ar2"
 

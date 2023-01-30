@@ -13,7 +13,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_mach_m249para.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_M249.Single")
+SWEP.ShotSound				= Sound(")weapons/m249/m249-1.wav")
 SWEP.WorldModel             = "models/weapons/w_mach_m249para.mdl"
 SWEP.HoldType               = "ar2"
 

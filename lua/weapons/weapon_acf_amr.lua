@@ -12,7 +12,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/v_sniper.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("acf_base/weapons/sniper_fire.mp3")
+SWEP.ShotSound				= Sound(")acf_base/weapons/sniper_fire.mp3")
 SWEP.WorldModel             = "models/weapons/w_sniper.mdl"
 SWEP.HoldType               = "ar2"
 

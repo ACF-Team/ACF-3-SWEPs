@@ -13,7 +13,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/v_xm25.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("acf_base/weapons/grenadelauncher.mp3")
+SWEP.ShotSound				= Sound(")acf_base/weapons/grenadelauncher.mp3")
 SWEP.WorldModel             = "models/weapons/w_xm25.mdl"
 SWEP.HoldType               = "ar2"
 

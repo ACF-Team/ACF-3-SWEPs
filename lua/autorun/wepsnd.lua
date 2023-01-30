@@ -133,4 +133,4 @@ sound.Add({name = "Weapon_Thompson.BoltForward", channel = 3, volume = 1, level 
 sound.Add({name = "Weapon_Thompson.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
 sound.Add({name = "Weapon_Thompson.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "thompson/thompson_worldreload.wav"})
 
-print("ACF-3 SWEPS SOUND")
+print("ACF-3 SWEPS SOUNDSCRIPT INITIALIZED")

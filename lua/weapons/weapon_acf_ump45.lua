@@ -10,7 +10,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_smg_ump45.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_UMP45.Single")
+SWEP.ShotSound				= Sound(")weapons/ump45/ump45-1.wav")
 SWEP.WorldModel             = "models/weapons/w_smg_ump45.mdl"
 SWEP.HoldType               = "smg"
 

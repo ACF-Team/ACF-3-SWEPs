@@ -11,7 +11,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_pist_usp.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_USP.Single")
+SWEP.ShotSound				= Sound(")weapons/usp/usp_unsil-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_usp.mdl"
 SWEP.HoldType               = "pistol"
 

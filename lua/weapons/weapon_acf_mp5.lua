@@ -12,7 +12,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_smg_mp5.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_MP5Navy.Single")
+SWEP.ShotSound				= Sound(")weapons/mp5navy/mp5-1.wav")
 SWEP.WorldModel             = "models/weapons/w_smg_mp5.mdl"
 SWEP.HoldType               = "ar2"
 

@@ -12,7 +12,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_rif_galil.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_Galil.Single")
+SWEP.ShotSound				= Sound(")weapons/galil/galil-1.wav")
 SWEP.WorldModel             = "models/weapons/w_rif_galil.mdl"
 SWEP.HoldType               = "ar2"
 

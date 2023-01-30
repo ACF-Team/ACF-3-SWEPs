@@ -10,7 +10,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_rif_m4a1.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_M4A1.Single")
+SWEP.ShotSound				= Sound(")weapons/m4a1/m4a1_unsil-1.wav")
 SWEP.WorldModel             = "models/weapons/w_rif_m4a1.mdl"
 SWEP.HoldType               = "ar2"
 

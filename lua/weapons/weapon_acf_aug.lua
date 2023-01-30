@@ -12,7 +12,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_rif_aug.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_AUG.Single")
+SWEP.ShotSound				= Sound(")weapons/aug/aug-1.wav")
 SWEP.WorldModel             = "models/weapons/w_rif_aug.mdl"
 SWEP.HoldType               = "smg"
 

@@ -10,7 +10,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_pist_deagle.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_DEagle.Single")
+SWEP.ShotSound				= Sound(")weapons/DEagle/deagle-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_deagle.mdl"
 SWEP.HoldType               = "pistol"
 

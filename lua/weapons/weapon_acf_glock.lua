@@ -10,7 +10,7 @@ SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_pist_glock18.mdl"
 SWEP.ViewModelFlip          = false
 
-SWEP.ShotSound				= Sound("Weapon_Glock.Single")
+SWEP.ShotSound				= Sound(")weapons/glock/glock18-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_glock18.mdl"
 SWEP.HoldType               = "revolver"
 
