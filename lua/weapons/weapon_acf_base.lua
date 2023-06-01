@@ -193,10 +193,9 @@ function SWEP:Initialize()
 	if self.FiremodeSetting ~= 1 then
 		if self.CurrentFiremode == 1 then self.Primary.Automatic = true else self.Primary.Automatic = false end
 	end
-	self:SetNW2Bool("automatic",self.Primary.Automatic)
+	self:UpdateFiremode()
 
 	self:SetHoldType(self.HoldType)
-	self:SetNW2Int("firemode",self.CurrentFiremode)
 
 	-- These have to be networked since the clientside ACF bullets don't get information from anything except the crate (the gun represents this in this case)
 	self:SetNW2Float("Caliber",self.Bullet.Caliber)
@@ -224,10 +223,11 @@ function SWEP:GetAimMod()
 	local Prone = false
 	if Owner.IsProne then Prone = Owner:IsProne() end -- Prone mod support
 
-	local VelMod = math.Clamp(Owner:GetAbsVelocity():LengthSqr() / 30000,0,3) * self.MoveBloom
-	local StanceMod = (Prone and Owner:IsOnGround() and 0.25) or ((Owner:Crouching() and Owner:IsOnGround()) and 0.5 or 1)
-	local OnGround = (Owner:IsOnGround() and 1 or 3)
-	local Bloom = (1 - math.Clamp((CurTime() - LastShot) * self.Recovery,0,1)) * self.Spread * 8 * (1 / (self.Handling / math.min(1,1.5 * StanceMod)))
+	local VelMod = math.Clamp(Owner:GetAbsVelocity():LengthSqr() / 50000,0,2) * self.MoveBloom
+	local OwnerOnGround = Owner:IsOnGround()
+	local StanceMod = (Prone and OwnerOnGround and 0.25) or ((Owner:Crouching() and OwnerOnGround) and 0.5 or 1)
+	local OnGround = (OwnerOnGround and 1 or 3)
+	local Bloom = (1 - math.Clamp((CurTime() - LastShot) * self.Recovery,0,1)) * self.Spread * 6 * (1 / (self.Handling / math.min(1,1.3 * StanceMod)))
 	if SERVER then
 		local Focus = (self:GetNWBool("iron") and (not Owner:IsSprinting()) and self.AimFocused or self.AimUnfocused)
 		return math.min(30,((Focus * StanceMod) + Bloom + VelMod) * OnGround)
@@ -254,13 +254,14 @@ end
 function SWEP:CanPrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 
+	if self.Primary.Automatic ~= self:GetNWBool("automatic",false) then self:UpdateFiremode() end
+
 	if not IsFirstTimePredicted() then return false end
 	if self:GetOwner():IsPlayer() then
 		if SERVER and game.SinglePlayer() then self:CallOnClient("PrimaryAttack") end
 
 		if CLIENT and (CurTime() - self.LastShot) < self.Primary.Delay then return end
 	end
-	if self.Primary.Automatic ~= self:GetNW2Bool("automatic",false) then self.Primary.Automatic = self:GetNW2Bool("automatic",false) end
 
 	if (self:Clip1() <= 0) then
 		self:EmitSound( "Weapon_Pistol.Empty" )
@@ -278,7 +279,7 @@ function SWEP:CanPrimaryAttack()
 	-- Calls this hook to see if this gun is allowed to shoot an ACF shell
 	-- There isn't a way for the client to know about this, so we'll just replenish the clientside ammo
 	if SERVER and (hook.Run("ACF_FireShell", self) == false) then
-		self:SetNW2Int("lastammo")
+		self:SetNWInt("lastammo")
 		self:CallOnClient("ResetAmmo")
 
 		self.LastShot = CurTime()
@@ -310,7 +311,7 @@ function SWEP:PostShot(NumberShots)
 end
 
 function SWEP:ResetAmmo() -- Only called clientside, to replenish "used" ammo if the server denies an ACF bullet being made
-	self:SetClip1(self:GetNW2Int("lastammo",self:Clip1()))
+	self:SetClip1(self:GetNWInt("lastammo",self:Clip1()))
 	self:SetNextPrimaryFire(CurTime() + 0.2)
 	self:SendWeaponAnim(ACT_VM_IDLE)
 end
@@ -327,8 +328,8 @@ function SWEP:SecondaryAttack()
 
 			self.CurrentFiremode = A
 			if self.CurrentFiremode == 1 then self.Primary.Automatic = true else self.Primary.Automatic = false end
-			self:SetNW2Int("firemode",self.CurrentFiremode)
-			self:SetNW2Bool("automatic",self.Primary.Automatic)
+
+			self:UpdateFiremode()
 		else
 			self:EmitSound(FiremodeSound)
 		end
@@ -338,6 +339,16 @@ function SWEP:SecondaryAttack()
 	end
 
 	return true
+end
+
+function SWEP:UpdateFiremode()
+	if SERVER then
+		self:SetNWInt("firemode",self.CurrentFiremode)
+		self:SetNWBool("automatic",self.Primary.Automatic)
+		self:CallOnClient("UpdateFiremode")
+	end
+
+	if self.Primary.Automatic ~= self:GetNWBool("automatic",false) then self.Primary.Automatic = self:GetNWBool("automatic",false) end
 end
 
 function SWEP:Deploy()
@@ -352,7 +363,7 @@ function SWEP:Deploy()
 
 		-- Hopefully fixes some weird problem with weapons not "recoiling" as they should
 		self.Primary.Automatic = false
-		timer.Simple(0,function() self.Primary.Automatic = self:GetNW2Bool("automatic",false) end)
+		timer.Simple(0,function() self.Primary.Automatic = self:GetNWBool("automatic",false) end)
 	end
 
 	if self.HasDropCalc then self.DropCalc = self:CalcDropTable() end
@@ -585,7 +596,7 @@ if CLIENT then
 	end
 
 	local SM = {x = SX / 2, y = SY / 2}
-	local UU = (SX > SY) and (SY / 12) or (SX / 12)
+	--local UU = (SX > SY) and (SY / 12) or (SX / 12)
 	function SWEP:DoDrawCrosshair(x,y)
 		local AimMod = self:GetAimMod()
 		local Spread = self.Spread
@@ -805,12 +816,12 @@ if CLIENT then
 				for I = 1,#self.DropCalc do
 					local DD = self.DropCalc[I]
 					local BPos = DD[1]
-					local Pos = (ShootPos + (FWD * BPos.x) + (UP * BPos.z)):ToScreen()
-					local Scale = math.max((200 / DD[3]) * 12,1)
+					local Pos = (ShootPos + (FWD * BPos.x) + (Vector(0,0,1) * BPos.z)):ToScreen()
+					local LineScale = math.max((200 / DD[3]) * 12,1)
 					surface.SetDrawColor(Black)
 					surface.DrawLine(Pos.x - Scale,Pos.y,Pos.x,Pos.y)
 					surface.SetDrawColor(White)
-					surface.DrawLine(Pos.x,Pos.y,Pos.x + Scale,Pos.y)
+					surface.DrawLine(Pos.x,Pos.y,Pos.x + LineScale,Pos.y)
 
 					draw.SimpleTextOutlined(DD[3] .. "m, " .. math.Round(DD[2],2) .. "s","SWEP-HUD-FONT",Pos.x - 64,Pos.y,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
 				end
@@ -853,7 +864,7 @@ if CLIENT then
 		end
 
 		if self.FiremodeSetting ~= 1 then
-			draw.SimpleTextOutlined(FireModeAlias[self:GetNW2Int("firemode",1)],"SWEP-HUD-FONT",SX - 16,SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
+			draw.SimpleTextOutlined(FireModeAlias[self:GetNWInt("firemode",1)],"SWEP-HUD-FONT",SX - 16,SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
 		end
 
 		draw.SimpleTextOutlined("AMMO TYPE: " .. self.Primary.Ammo,"SWEP-HUD-FONT",SX - 40 + (self.FiremodeSetting == 1 and 20 or 0),SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
