@@ -53,7 +53,6 @@ function SWEP:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
 	local Ply = self:GetOwner()
 
-	
 	local AimMod = self:GetAimMod()
 	local Punch = self:GetPunch()
 
@@ -78,6 +77,4 @@ function SWEP:PrimaryAttack()
 	self:PostShot(1)
 
 	timer.Simple(0.1,function() if (Ply:GetActiveWeapon() == self) and self:GetSequenceName(self:GetSequence()) ~= "reload_unsil" then self:SendWeaponAnim(ACT_VM_IDLE) end end)
-
-	
 end

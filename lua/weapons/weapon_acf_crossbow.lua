@@ -64,7 +64,6 @@ function SWEP:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
 	local Ply = self:GetOwner()
 
-	
 	local AimMod = self:GetAimMod()
 	local Punch = self:GetPunch()
 
@@ -87,8 +86,6 @@ function SWEP:PrimaryAttack()
 
 	self:PostShot(1)
 	self:EmitSound("Weapon_Crossbow.BoltFly")
-
-	
 end
 
 function SWEP:Reload()

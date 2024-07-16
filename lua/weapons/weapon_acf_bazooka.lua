@@ -101,7 +101,6 @@ function SWEP:PrimaryAttack()
 	end
 	local Ply = self:GetOwner()
 
-	
 	local AimMod = self:GetAimMod()
 	local Punch = self:GetPunch()
 
@@ -122,8 +121,6 @@ function SWEP:PrimaryAttack()
 	end
 
 	self:PostShot(1)
-
-	
 end
 
 local FiremodeSound = Sound("Weapon_SMG1.Special2")

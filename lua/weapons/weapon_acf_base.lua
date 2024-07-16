@@ -363,7 +363,11 @@ function SWEP:Deploy()
 
 		-- Hopefully fixes some weird problem with weapons not "recoiling" as they should
 		self.Primary.Automatic = false
-		timer.Simple(0,function() self.Primary.Automatic = self:GetNWBool("automatic",false) end)
+		timer.Simple(0,function()
+			if IsValid(self) then
+				self.Primary.Automatic = self:GetNWBool("automatic",false)
+			end
+		end)
 	end
 
 	if self.HasDropCalc then self.DropCalc = self:CalcDropTable() end
@@ -443,8 +447,6 @@ function SWEP:Think()
 
 			self.NextThinkTime = CurTime() + 0.01
 		end
-	else
-
 	end
 end
 

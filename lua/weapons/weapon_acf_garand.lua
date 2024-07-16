@@ -64,7 +64,6 @@ function SWEP:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
 	local Ply = self:GetOwner()
 
-	
 	local AimMod = self:GetAimMod()
 	local Punch = self:GetPunch()
 
@@ -87,6 +86,4 @@ function SWEP:PrimaryAttack()
 	self:PostShot(1)
 
 	if self:Clip1() == 0 then self:EmitSound(Ping) end
-
-	
 end
