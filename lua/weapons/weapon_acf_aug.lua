@@ -76,7 +76,7 @@ function SWEP:PrimaryAttack()
 		if self:Clip1() % 3 == 1 then self:SetNW2Float("Tracer",self.Tracer) else self:SetNW2Float("Tracer",0) end
 
 		self:ShootBullet(Ply:GetShootPos(),Dir)
-	else
+
 		self:Recoil(Punch)
 	end
 

@@ -81,7 +81,6 @@ function SWEP:DoReload()
 		self:SendWeaponAnim(ACT_VM_RELOAD)
 
 		self:SetNextPrimaryFire(CurTime() + self:SequenceDuration())
-
 		timer.Simple(self:SequenceDuration(),function() if self.Reloading then self:SetClip1(self:Clip1() + 1) self:GetOwner():RemoveAmmo(1,self.Primary.Ammo) self:DoReload() end end)
 
 		self.NextShell = (CurTime() + self:SequenceDuration())
@@ -128,7 +127,7 @@ function SWEP:PrimaryAttack()
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 		local Dir = (Aim + Spread):GetNormalized()
 
-		for I = 1, 24 do
+		for _ = 1, 24 do
 			local BCone = math.tan(math.rad(self.Spread))
 			local BrandUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
 			local BSpread = BrandUnitSquare:GetNormalized() * BCone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
@@ -136,7 +135,7 @@ function SWEP:PrimaryAttack()
 
 			self:ShootBullet(Ply:GetShootPos(),AimSpread)
 		end
-	else
+
 		self:Recoil(Punch)
 	end
 

@@ -75,7 +75,7 @@ function SWEP:PrimaryAttack()
 		local Dir = (Aim + Spread):GetNormalized()
 
 		self:ShootBullet(Ply:GetShootPos(),Dir)
-	else
+
 		self:Recoil(Punch)
 	end
 

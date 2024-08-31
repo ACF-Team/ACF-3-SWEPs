@@ -80,8 +80,8 @@ function SWEP:PrimaryAttack()
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 		local Dir = (Aim + Spread):GetNormalized()
 
-		self:ShootBullet(Ply:GetShootPos(),Dir)
-	else
+		self:ShootBullet(Ply:GetShootPos(), Dir)
+
 		self:Recoil(Punch)
 	end
 
@@ -89,9 +89,10 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:Reload()
-	self:SetNWBool("iron",false)
-	if self:Ammo1() > 0 then
-		self:DefaultReload( ACT_VM_RELOAD )
+	self:SetNWBool("iron", false)
+
+	if self:Ammo1() > 0 and self:Clip1() < self:GetMaxClip1() then
+		self:DefaultReload(ACT_VM_RELOAD)
 		self:EmitSound(Reload)
 	end
 end

@@ -251,6 +251,8 @@ function SWEP:ShootBullet(Pos,Dir)
 	AmmoTypes[self.ACFType]:Create(self,self.Bullet)
 end
 
+local IsSinglePlayer = game.SinglePlayer()
+
 function SWEP:CanPrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 
@@ -258,7 +260,7 @@ function SWEP:CanPrimaryAttack()
 
 	if not IsFirstTimePredicted() then return false end
 	if self:GetOwner():IsPlayer() then
-		if SERVER and game.SinglePlayer() then self:CallOnClient("PrimaryAttack") end
+		if SERVER and IsSinglePlayer then self:CallOnClient("PrimaryAttack") end
 
 		if CLIENT and (CurTime() - self.LastShot) < self.Primary.Delay then return end
 	end
@@ -375,7 +377,7 @@ function SWEP:Deploy()
 	self.LastShot = CurTime()
 	if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
 
-	self.Owner = self:GetOwner() -- A quick way to match what ACF does for this
+	-- self.Owner = self:GetOwner() -- A quick way to match what ACF does for this
 
 	self:SendWeaponAnim(ACT_VM_DRAW) -- another missing anim
 
@@ -404,7 +406,7 @@ function SWEP:Reload()
 end
 
 function SWEP:GetPunch()
-	return Angle(math.Rand(-1.5,-2.5),math.Rand(-0.8,0.8),0) * self.RecoilMod * (self:GetNWBool("iron",false) and 0.4 or 1)
+	return Angle(math.Rand(-1.5, -3.5), math.Rand(-0.8, 0.8), 0) * self.RecoilMod * (self:GetNWBool("iron", false) and 0.4 or 1)
 end
 
 function SWEP:GetNPCBulletSpread()
@@ -484,6 +486,11 @@ function SWEP:CalcDropTable()
 	return DropTable
 end
 
+function SWEP:Recoil(PunchAmt)
+	local Ply = self:GetOwner()
+	Ply:ViewPunch(PunchAmt)
+end
+
 if CLIENT then
 	local Black = Color(0,0,0)
 	local White = Color(255,255,255)
@@ -501,7 +508,7 @@ if CLIENT then
 		extended	= true
 	})
 
-	function SWEP:DrawWorldModel(STUDIOFLAG)
+	function SWEP:DrawWorldModel()
 		self:SetColor(White)
 		if not self.CustomWorldModelPos then self:DrawModel() return end
 		local owner = self:GetOwner()
@@ -519,30 +526,24 @@ if CLIENT then
 		self:DrawModel()
 	end
 
-	function SWEP:Recoil(PunchAmt)
-		local Ply = self:GetOwner()
-		Ply:SetEyeAngles(Ply:EyeAngles() + PunchAmt)
-	end
-
 	function SWEP:TranslateFOV(FOV)
 		local Owner = self:GetOwner()
-		if not self.FOV then self.FOV = Owner:GetFOV() end
-		local Rate = math.Clamp(RealTime() - self.RateTime,0,1)
+		local SelfTbl = self:GetTable()
+		local Rate = math.Clamp(RealTime() - SelfTbl.RateTime, 0, 1)
 
-		local InIrons = self:GetNWBool("iron",false) and not self.Reloading and not (self.TempOut or false)
+		local InIrons = self:GetNWBool("iron", false) and not SelfTbl.Reloading and not (SelfTbl.TempOut or false)
 
-		self.SprintScale = self.SprintScale * (1 - (Rate * 7)) + ((Owner:IsSprinting() and (Owner:GetAbsVelocity():LengthSqr() > 10000)) and 1 or 0) * (Rate * 7)
+		local SprintScale = SelfTbl.SprintScale * (1 - (Rate * 7)) + ((Owner:IsSprinting() and (Owner:GetAbsVelocity():LengthSqr() > 10000)) and 1 or 0) * (Rate * 7)
 
-		self.IronScale = self.IronScale * (1 - (Rate * 5)) + (InIrons and (1 - self.SprintScale) or 0) * (Rate * 5)
+		local IronScale = SelfTbl.IronScale * (1 - (Rate * 5)) + (InIrons and (1 - SprintScale) or 0) * (Rate * 5)
 
-		local Sway = (1.2 - self.IronScale)
+		SelfTbl.RateTime = RealTime()
+		local FinalIronScale = IronScale >= 0.75 and ((IronScale - 0.75) / 0.25) or 0
 
-		self.SwayScale = Sway * (0.5 + self.SprintScale)
-		self.BobScale = Sway * (1 + (self.SprintScale * 2))
+		SelfTbl.SprintScale = SprintScale
+		SelfTbl.IronScale = IronScale
 
-		self.RateTime = RealTime()
-		local FinalIronScale = self.IronScale >= 0.75 and ((self.IronScale - 0.75) / 0.25) or 0
-		return (self.FOV / (self.Zoom or 1)) * FinalIronScale + (self.FOV * (1 - FinalIronScale))
+		return (FOV / (SelfTbl.Zoom or 1)) * FinalIronScale + (FOV * (1 - FinalIronScale))
 	end
 
 	function SWEP:AdjustMouseSensitivity()
@@ -556,8 +557,8 @@ if CLIENT then
 
 	function SWEP:GetViewModelPosition(Pos,Ang)
 		-- A * ( 1 - X ) + B * X
-		local Up,Right,Forward = Ang:Up(),Ang:Right(),Ang:Forward()
-		local Mul = math.min(self.IronScale / 0.75,1)
+		local Up,Right,Forward = Ang:Up(), Ang:Right(), Ang:Forward()
+		local Mul = math.min(self.IronScale / 0.75, 1)
 
 		local Owner = self:GetOwner()
 		local ep = Owner:EyePos()
@@ -571,10 +572,14 @@ if CLIENT then
 			IronAng = AimData.IronAng
 		end
 
-		if self.SprintScale > 0.0001 then
-			Ang:RotateAroundAxis(Right, self.SprintAng.x * self.SprintScale)
-			Ang:RotateAroundAxis(Up, self.SprintAng.y * self.SprintScale)
-			Ang:RotateAroundAxis(Forward, self.SprintAng.z * self.SprintScale)
+		local SprintScale = self.SprintScale
+
+		if SprintScale > 0.0001 then
+			local SprintAng = self.SprintAng
+
+			Ang:RotateAroundAxis(Right, SprintAng.x * SprintScale)
+			Ang:RotateAroundAxis(Up, SprintAng.y * SprintScale)
+			Ang:RotateAroundAxis(Forward, SprintAng.z * SprintScale)
 		end
 
 		if IronAng then
@@ -655,7 +660,7 @@ if CLIENT then
 	end
 
 	SWEP.FrameCount = 0 -- cheap way to control DPanel
-	function SWEP:DrawWeaponSelection(x,y,w,h,alpha)
+	function SWEP:DrawWeaponSelection(x,y,w,h)
 		draw.RoundedBox(8,x,y,w,h,Col)
 		draw.RoundedBox(4,x + 8,y + 8,w - 16,h - 16,BGCol)
 		surface.SetDrawColor(White)
@@ -676,7 +681,7 @@ if CLIENT then
 			local Icon = vgui.Create("DModelPanel",Panel)
 			Icon:SetSize(w,w)
 			Icon:Center()
-			function Icon:LayoutEntity(Entity) return end
+			function Icon:LayoutEntity() return end
 			Icon:SetModel(self.WorldModel)
 			local E = Icon.Entity
 			E:SetMaterial("models/wireframe")
@@ -787,19 +792,20 @@ if CLIENT then
 	end
 
 	function SWEP:DrawHUD()
+		local SelfTbl = self:GetTable()
 		local Ammo = self:Clip1()
 		local SpareAmmo = self:Ammo1()
-		local ClipSize = self.Primary.ClipSize
+		local ClipSize = SelfTbl.Primary.ClipSize
 		local AmmoPerc = Ammo / ClipSize
 		local Size = 1400
 
-		if (self.IronScale >= 0.85) and (self.Scope == true) and not self.TempOut then
+		if (SelfTbl.IronScale >= 0.85) and (SelfTbl.Scope == true) and not SelfTbl.TempOut then
 			local ShootPos = self:GetOwner():GetShootPos()
 			local ShootAng = EyeAngles()
 			local FWD = ShootAng:Forward()
 			local UP = ShootAng:Up()
 			local RGT = ShootAng:Right()
-			if self.HasDropCalc and (self.CalcRun == true) then
+			if SelfTbl.HasDropCalc and (SelfTbl.CalcRun == true) then
 				local Spot100 = (ShootPos + (FWD * 200 * 39.37) + (RGT * 200) + (UP * 72)):ToScreen()
 				local Spot800 = (ShootPos + (FWD * 800 * 39.37) + (UP * 72)):ToScreen()
 
@@ -807,18 +813,20 @@ if CLIENT then
 
 				for I = 1, 4 do
 					local Mark = (ShootPos + (FWD * 200 * I * 39.37) + (RGT * 200 * (1 - ((I - 1) / 3))) + (UP * 72)):ToScreen()
-					surface.DrawLine(Mark.x + (Size * 0.05),Mark.y,Mark.x + (Size * 0.05),Mark.y - 12)
-					draw.SimpleTextOutlined((200 * I) .. "m","SWEP-HUD-FONT",Mark.x + (Size * 0.05),Mark.y - 12,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
+					surface.DrawLine(Mark.x + (Size * 0.05), Mark.y, Mark.x + (Size * 0.05), Mark.y - 12)
+					draw.SimpleTextOutlined((200 * I) .. "m", "SWEP-HUD-FONT", Mark.x + (Size * 0.05), Mark.y - 12, White, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER, 1, Black)
 				end
 
-				surface.DrawLine(Spot100.x + (Size * 0.05),Spot100.y,Spot800.x + (Size * 0.05),Spot800.y)
+				surface.DrawLine(Spot100.x + (Size * 0.05), Spot100.y,Spot800.x + (Size * 0.05), Spot800.y)
 				surface.SetDrawColor(White)
-				surface.DrawLine(Spot100.x + (Size * 0.05),Spot100.y + 1,Spot800.x + (Size * 0.05),Spot800.y + 1)
+				surface.DrawLine(Spot100.x + (Size * 0.05), Spot100.y + 1,Spot800.x + (Size * 0.05), Spot800.y + 1)
 
-				for I = 1,#self.DropCalc do
-					local DD = self.DropCalc[I]
+				local DropCalc = SelfTbl.DropCalc
+
+				for I = 1, #DropCalc do
+					local DD = DropCalc[I]
 					local BPos = DD[1]
-					local Pos = (ShootPos + (FWD * BPos.x) + (Vector(0,0,1) * BPos.z)):ToScreen()
+					local Pos = (ShootPos + (FWD * BPos.x) + (vector_up * BPos.z)):ToScreen()
 					local LineScale = math.max((200 / DD[3]) * 12,1)
 					surface.SetDrawColor(Black)
 					surface.DrawLine(Pos.x - Scale,Pos.y,Pos.x,Pos.y)
@@ -827,16 +835,16 @@ if CLIENT then
 
 					draw.SimpleTextOutlined(DD[3] .. "m, " .. math.Round(DD[2],2) .. "s","SWEP-HUD-FONT",Pos.x - 64,Pos.y,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_CENTER,1,Black)
 				end
-			elseif self.HasDropCalc and (self.CalcRun == false) then
-				self.DropCalc = self:CalcDropTable()
+			elseif SelfTbl.HasDropCalc and (SelfTbl.CalcRun == false) then
+				SelfTbl.DropCalc = self:CalcDropTable()
 			end
 			surface.SetDrawColor(Black)
 			surface.SetMaterial(ScopeMat)
 			-- Scope box
-			surface.DrawTexturedRect(SM.x - Size,SM.y - Size,Size * 2,Size * 2)
+			surface.DrawTexturedRect(SM.x - Size, SM.y - Size, Size * 2, Size * 2)
 			-- Edge filler
-			surface.DrawRect(0,SM.y + Size * 0.75,SX,SY)
-			surface.DrawRect(0,SM.y - (Size * 0.75) - SY,SX,SY)
+			surface.DrawRect(0, SM.y + Size * 0.75,SX,SY)
+			surface.DrawRect(0, SM.y - (Size * 0.75) - SY,SX,SY)
 
 			surface.DrawRect(SM.x + Size * 0.75,0,SX,SY)
 			surface.DrawRect(SM.x - (Size * 0.75) - SX,0,SX,SY)
@@ -847,7 +855,7 @@ if CLIENT then
 
 			draw.NoTexture()
 
-			ScreenBlack.a = 255 * (1 - (self.IronScale - 0.75) / 0.25)
+			ScreenBlack.a = 255 * (1 - (SelfTbl.IronScale - 0.75) / 0.25)
 
 			surface.SetDrawColor(ScreenBlack)
 			surface.DrawRect(0,0,SX,SY)
@@ -856,7 +864,7 @@ if CLIENT then
 		draw.NoTexture()
 		local Mags = math.ceil(SpareAmmo / ClipSize)
 		local DrawAmmo = DrawMagazine
-		local AmmoScale = math.max(SX / 1920,1)
+		local AmmoScale = math.max(SX / 1920, 1)
 		local AmmoSize = 16 * AmmoScale
 		if ClipSize == 1 then
 			DrawAmmo = DrawRound
@@ -865,11 +873,11 @@ if CLIENT then
 			draw.SimpleTextOutlined(Ammo .. " / " .. ClipSize,"SWEP-HUD-FONT",SX - 12,SY - (48 * AmmoScale),White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
 		end
 
-		if self.FiremodeSetting ~= 1 then
+		if SelfTbl.FiremodeSetting ~= 1 then
 			draw.SimpleTextOutlined(FireModeAlias[self:GetNWInt("firemode",1)],"SWEP-HUD-FONT",SX - 16,SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
 		end
 
-		draw.SimpleTextOutlined("AMMO TYPE: " .. self.Primary.Ammo,"SWEP-HUD-FONT",SX - 40 + (self.FiremodeSetting == 1 and 20 or 0),SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
+		draw.SimpleTextOutlined("AMMO TYPE: " .. SelfTbl.Primary.Ammo,"SWEP-HUD-FONT",SX - 40 + (SelfTbl.FiremodeSetting == 1 and 20 or 0),SY - 4,White,TEXT_ALIGN_RIGHT,TEXT_ALIGN_BOTTOM,1,Black)
 
 		surface.SetDrawColor(SetAmmoColor(AmmoPerc))
 		DrawAmmo(SX - 24,SY - (32 * AmmoScale),10 * AmmoScale)
