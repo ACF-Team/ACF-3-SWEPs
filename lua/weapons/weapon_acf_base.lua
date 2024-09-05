@@ -241,13 +241,13 @@ function SWEP:GetAimMod()
 	end
 end
 
-local function ShootACFBullet(swep, Pos, Dir)
+local function ShootACFBullet(swep, Pos, Dir, Filter)
 	local Ply = swep:GetOwner()
 
 	swep.Bullet.Owner = Ply
 	swep.Bullet.Gun = swep
 	swep.Bullet.Pos = Pos
-	swep.Bullet.Filter = {Ply,swep}
+	swep.Bullet.Filter = Filter
 	swep.Bullet.Crate = swep:EntIndex()
 
 	swep.Bullet.Flight = Dir * swep.ACFMuzzleVel * 39.37 + Ply:GetVelocity()
@@ -255,13 +255,26 @@ local function ShootACFBullet(swep, Pos, Dir)
 	AmmoTypes[swep.ACFType]:Create(swep, swep.Bullet)
 end
 
-local mask = bit.bor(MASK_SOLID, MASK_SHOT)
+function SWEP:ResolveAim()
+	local Ply = self:GetOwner()
+
+	return Ply:GetAimVector():Angle()
+end
+
+local mask = bit.band(MASK_SOLID, MASK_SHOT) + CONTENTS_AUX
 function SWEP:ShootBullet(Pos,Dir)
 	local Ply = self:GetOwner()
 	local SelfTbl = self:GetTable()
 
 	local filter = {Ply, self}
-	if Ply:InVehicle() then table.insert(filter, Ply:GetVehicle()) end
+	if Ply:InVehicle() then
+		local vic = Ply:GetVehicle()
+		table.insert(filter, vic)
+
+		if IsValid(vic.AliasEnt) and vic.AliasEnt ~= NULL then
+			table.insert(filter, vic.AliasEnt)
+		end
+	end
 
 	if SelfTbl.UseHybrid and SelfTbl.ACFType == "AP" then
 		Ply:LagCompensation(true)
@@ -273,8 +286,9 @@ function SWEP:ShootBullet(Pos,Dir)
 			local Bullet	= SelfTbl.Bullet
 			local Thickness	= tr.Entity.ACF.Armour
 			local Dist		= Pos:Distance(tr.HitPos)
+			local RangedSpeed	= ACF.GetRangedSpeed(SelfTbl.ACFMuzzleVel, Bullet.DragCoef, Dist / 39.37) * 0.0254
 
-			DmgResult:SetPenetration(ACF.Penetration(ACF.GetRangedSpeed(SelfTbl.ACFMuzzleVel, Bullet.DragCoef, Dist / 39.37) * 0.0254, Bullet.ProjMass, Bullet.Diameter * 10))
+			DmgResult:SetPenetration(ACF.Penetration(RangedSpeed, Bullet.ProjMass, Bullet.Diameter * 10))
 			DmgResult:SetArea(Bullet.ProjArea)
 			DmgResult:SetThickness(Thickness)
 			DmgResult:SetAngle(ACF.GetHitAngle(tr, Dir))
@@ -287,12 +301,18 @@ function SWEP:ShootBullet(Pos,Dir)
 			DmgInfo:SetHitPos(tr.HitPos)
 			DmgInfo:SetHitGroup(tr.HitGroup)
 
-			Damage.dealDamage(tr.Entity, DmgResult, DmgInfo)
+			local HitRes = Damage.dealDamage(tr.Entity, DmgResult, DmgInfo)
+
+			if HitRes.Kill and IsValid(tr.Entity) then
+				local Energy = ACF.Kinetic(RangedSpeed, Bullet.ProjMass)
+
+				ACF.APKill(tr.Entity, Dir, Energy.Kinetic, DmgInfo)
+			end
 		else
-			ShootACFBullet(self, Pos, Dir)
+			ShootACFBullet(self, Pos, Dir, filter)
 		end
 	else
-		ShootACFBullet(self, Pos, Dir)
+		ShootACFBullet(self, Pos, Dir, filter)
 	end
 end
 

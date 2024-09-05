@@ -57,15 +57,14 @@ function SWEP:PrimaryAttack()
 	local Punch = self:GetPunch()
 
 	if SERVER then
-		local Aim = self:GetForward()
-		local Right = self:GetRight()
-		local Up = self:GetUp()
-		if Ply:IsNPC() then Aim = Ply:GetAimVector() end
+		local Aim = self:ResolveAim()
+		local Right = Aim:Right()
+		local Up = Aim:Up()
 
 		local Cone = math.tan(math.rad(self.Spread * AimMod))
 		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim + Spread):GetNormalized()
+		local Dir = (Aim:Forward() + Spread):GetNormalized()
 
 		if self:Clip1() % 3 == 1 then self:SetNW2Float("Tracer",self.Tracer) else self:SetNW2Float("Tracer",0) end
 
