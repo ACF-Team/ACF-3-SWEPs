@@ -35,6 +35,8 @@ SWEP.Primary.Ammo           = "SMG1_Grenade"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 0.3
 
+SWEP.UseHybrid				= false
+
 SWEP.Caliber                = 25 -- mm diameter of bullet
 SWEP.ACFProjMass            = 0.5 -- kg of projectile
 SWEP.FillerMass				= 0.1

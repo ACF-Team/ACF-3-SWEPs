@@ -24,8 +24,8 @@ SWEP.SlotPos                = 0
 SWEP.Spawnable              = true
 SWEP.AdminOnly              = false
 
-SWEP.m_WeaponDeploySpeed    = 1.1
-SWEP.Spread                 = 0.5
+SWEP.m_WeaponDeploySpeed    = 1.5
+SWEP.Spread                 = 0.75
 SWEP.RecoilMod              = 2
 
 SWEP.Primary.ClipSize       = 1
@@ -34,13 +34,15 @@ SWEP.Primary.Ammo           = "XBowBolt"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 1.25
 
+SWEP.UseHybrid				= false
+
 SWEP.CalcDistance			= 100
 SWEP.CalcDistance2			= 300
 
 SWEP.Caliber                = 14.5 -- mm diameter of bullet
 SWEP.ACFProjMass            = 0.1 -- kg of projectile
 SWEP.ACFType                = "APDS"
-SWEP.ACFMuzzleVel           = 1000 -- m/s of bullet leaving the barrel
+SWEP.ACFMuzzleVel           = 700 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 1
 
 SWEP.IronScale              = 0
@@ -53,7 +55,7 @@ SWEP.Zoom					= 8
 SWEP.HasDropCalc			= true
 SWEP.Recovery				= 0.2
 
-SWEP.AimFocused				= 0.01
+SWEP.AimFocused				= 0.1
 SWEP.AimUnfocused			= 3
 
 SWEP.UseHands				= false

@@ -36,25 +36,27 @@ SWEP.Primary.Ammo           = "RPG_Round"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 0.2
 
+SWEP.UseHybrid				= false
+
 SWEP.Caliber                = 88 -- mm diameter of bullet
-SWEP.ACFProjMass            = 1.437 -- kg of projectile
-SWEP.FillerMass				= 0.53
+SWEP.ACFProjMass            = 3.1546 -- kg of projectile
+SWEP.FillerMass				= 1.2552
 
 -- I hate how inaccessible this is
 SWEP.ACFHEATDetAngle		= 75
-SWEP.ACFHEATStandoff		= 0.05305
-SWEP.ACFHEATLinerMass		= 0.2238
-SWEP.ACFHEATPropMass		= 2.4867
-SWEP.ACFHEATCartMass		= 2.5006
-SWEP.ACFHEATCasingMass		= 1.1571
+SWEP.ACFHEATStandoff		= 0.006637
+SWEP.ACFHEATLinerMass		= 0.283327
+SWEP.ACFHEATPropMass		= 0.127116
+SWEP.ACFHEATCartMass		= 3.281269
+SWEP.ACFHEATCasingMass		= 1.615655
 -- I mean what the actual fuck, why can't I just call a single function to build this fucking data
-SWEP.ACFHEATJetMass			= 0.1317
-SWEP.ACFHEATJetMinVel		= 4592.6467
-SWEP.ACFHEATJetMaxVel		= 7993.0461
-SWEP.ACFHEATBoomFillerMass	= 0.4902
-SWEP.ACFHEATRoundVolume		= 1440.2468
-SWEP.ACFHEATBreakupDist		= 0.7396
-SWEP.ACFHEATBreakupTime		= 9.2531494462524e-05
+SWEP.ACFHEATJetMass			= 0.135737
+SWEP.ACFHEATJetMinVel		= 4396.25
+SWEP.ACFHEATJetMaxVel		= 8886.93
+SWEP.ACFHEATBoomFillerMass	= 0.5564587
+SWEP.ACFHEATRoundVolume		= 1783.8867
+SWEP.ACFHEATBreakupDist		= 0.113564
+SWEP.ACFHEATBreakupTime		= 1.2778834602665e-05
 
 SWEP.ACFType                = "HEAT"
 SWEP.ACFMuzzleVel           = 110 -- m/s of bullet leaving the barrel

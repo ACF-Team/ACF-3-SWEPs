@@ -4,6 +4,8 @@ AddCSLuaFile()
 -- TODO: Bipods!
 
 local AmmoTypes = ACF.Classes.AmmoTypes:GetEntries()
+local Damage	= ACF.Damage
+local DmgObj	= Damage.Objects
 
 SWEP.Author                 = "LiddulBOFH"
 SWEP.Base                   = "weapon_base" -- Loads in functions from this weapon base, don't change!
@@ -103,6 +105,8 @@ SWEP.MoveBloom				= 1
 SWEP.Recovery				= 1
 -- Further modifies the final bloom from the last shot fired (higher = better)
 SWEP.Handling				= 1
+-- Attempt a hybrid trace, one that will attempt to ease some pain with the SWEPs
+SWEP.UseHybrid				= true
 
 -- Internal values, don't change!
 SWEP.DropCalc				= {}
@@ -237,28 +241,70 @@ function SWEP:GetAimMod()
 	end
 end
 
+local function ShootACFBullet(swep, Pos, Dir)
+	local Ply = swep:GetOwner()
+
+	swep.Bullet.Owner = Ply
+	swep.Bullet.Gun = swep
+	swep.Bullet.Pos = Pos
+	swep.Bullet.Filter = {Ply,swep}
+	swep.Bullet.Crate = swep:EntIndex()
+
+	swep.Bullet.Flight = Dir * swep.ACFMuzzleVel * 39.37 + Ply:GetVelocity()
+
+	AmmoTypes[swep.ACFType]:Create(swep, swep.Bullet)
+end
+
+local mask = bit.bor(MASK_SOLID, MASK_SHOT)
 function SWEP:ShootBullet(Pos,Dir)
 	local Ply = self:GetOwner()
+	local SelfTbl = self:GetTable()
 
-	self.Bullet.Owner = Ply
-	self.Bullet.Gun = self
-	self.Bullet.Pos = Pos
-	self.Bullet.Filter = {Ply,self}
-	self.Bullet.Crate = self:EntIndex()
+	local filter = {Ply, self}
+	if Ply:InVehicle() then table.insert(filter, Ply:GetVehicle()) end
 
-	self.Bullet.Flight = Dir * self.ACFMuzzleVel * 39.37 + Ply:GetVelocity()
+	if SelfTbl.UseHybrid and SelfTbl.ACFType == "AP" then
+		Ply:LagCompensation(true)
+		local tr = util.TraceLine({start = Pos, endpos = Pos + (Dir * math.min(1024, SelfTbl.ACFMuzzleVel * 39.37 * 0.05) + Ply:GetVelocity()), filter = filter, mask = mask})
+		Ply:LagCompensation(false)
 
-	AmmoTypes[self.ACFType]:Create(self,self.Bullet)
+		if tr.Hit and ACF.Check(tr.Entity) then
+			local DmgResult, DmgInfo = DmgObj.DamageResult(), DmgObj.DamageInfo()
+			local Bullet	= SelfTbl.Bullet
+			local Thickness	= tr.Entity.ACF.Armour
+			local Dist		= Pos:Distance(tr.HitPos)
+
+			DmgResult:SetPenetration(ACF.Penetration(ACF.GetRangedSpeed(SelfTbl.ACFMuzzleVel, Bullet.DragCoef, Dist / 39.37) * 0.0254, Bullet.ProjMass, Bullet.Diameter * 10))
+			DmgResult:SetArea(Bullet.ProjArea)
+			DmgResult:SetThickness(Thickness)
+			DmgResult:SetAngle(ACF.GetHitAngle(tr, Dir))
+			DmgResult:SetFactor(1)
+
+			DmgInfo:SetAttacker(Ply)
+			DmgInfo:SetInflictor(self)
+			DmgInfo:SetType(DMG_BULLET)
+			DmgInfo:SetOrigin(Pos)
+			DmgInfo:SetHitPos(tr.HitPos)
+			DmgInfo:SetHitGroup(tr.HitGroup)
+
+			Damage.dealDamage(tr.Entity, DmgResult, DmgInfo)
+		else
+			ShootACFBullet(self, Pos, Dir)
+		end
+	else
+		ShootACFBullet(self, Pos, Dir)
+	end
 end
 
 local IsSinglePlayer = game.SinglePlayer()
 
 function SWEP:CanPrimaryAttack()
+	if not IsFirstTimePredicted() then return false end
+
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
 
 	if self.Primary.Automatic ~= self:GetNWBool("automatic",false) then self:UpdateFiremode() end
 
-	if not IsFirstTimePredicted() then return false end
 	if self:GetOwner():IsPlayer() then
 		if SERVER and IsSinglePlayer then self:CallOnClient("PrimaryAttack") end
 
