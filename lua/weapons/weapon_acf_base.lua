@@ -258,7 +258,7 @@ end
 function SWEP:ResolveAim()
 	local Ply = self:GetOwner()
 
-	return Ply:GetAimVector():Angle()
+	return Ply:GetAimVector():Angle() + Ply:GetViewPunchAngles()
 end
 
 local mask = bit.band(MASK_SOLID, MASK_SHOT) + CONTENTS_AUX
