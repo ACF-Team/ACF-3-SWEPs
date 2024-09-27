@@ -66,19 +66,19 @@ function SWEP:PrimaryAttack()
 		self:EmitSound( "Weapon_Pistol.Empty" )
 		self:Reload()
 		self:SetNextPrimaryFire(CurTime() + 0.25)
-		
+
 		self.LastShot = CurTime()
 		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
 
 		return false
 	end
-	
+
 	local Punch = self:GetPunch()
 	self:Recoil(Punch)
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-	
+
 	if not self:CanPrimaryAttack() then return end
-	
+
 	local Ply = self:GetOwner()
 	local AimMod = self:GetAimMod()
 
