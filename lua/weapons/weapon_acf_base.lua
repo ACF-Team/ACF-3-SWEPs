@@ -472,7 +472,7 @@ function SWEP:Reload()
 end
 
 function SWEP:GetPunch()
-	return Angle(math.Rand(-1.5, -3.5), math.Rand(-0.8, 0.8), 0) * self.RecoilMod * (self:GetNWBool("iron", false) and 0.4 or 1)
+	return Angle(-3, 0, 0) * self.RecoilMod * (self:GetNWBool("iron", false) and 0.4 or 1)
 end
 
 function SWEP:GetNPCBulletSpread()
@@ -553,8 +553,16 @@ function SWEP:CalcDropTable()
 end
 
 function SWEP:Recoil(PunchAmt)
-	local Ply = self:GetOwner()
-	Ply:ViewPunch(PunchAmt)
+IFTP = IsFirstTimePredicted()
+	if self.Owner:IsPlayer() and (self.Owner:IsSprinting() and (self.Owner:GetAbsVelocity():LengthSqr() > 10000)) then return false end
+	if (SP and SERVER) or (not SP and CLIENT and IFTP) then
+		ang = self.Owner:EyeAngles()
+		ang.p = ang.p - self.RecoilMod * 0.5
+		ang.y = ang.y + math.Rand(-1, 1) * self.RecoilMod * 0.5
+
+		self.Owner:SetEyeAngles(ang)
+	end
+	self.Owner:ViewPunch(PunchAmt)
 end
 
 if CLIENT then
