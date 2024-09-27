@@ -39,7 +39,7 @@ SWEP.Primary.Delay          = 0.1
 SWEP.Caliber                = 7.8 -- mm diameter of bullet
 SWEP.ACFProjMass            = 0.01 -- kg of projectile
 SWEP.ACFType                = "AP"
-SWEP.ACFMuzzleVel           = 685 -- m/s of bullet leaving the barrel
+SWEP.ACFMuzzleVel           = 815 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 1
 
 SWEP.IronScale              = 0
@@ -80,12 +80,26 @@ function SWEP:Reload()
 end
 
 function SWEP:PrimaryAttack()
-	if not self:CanPrimaryAttack() then return end
-	local Ply = self:GetOwner()
+	if self:Clip1() <= 0 then
+		self:EmitSound( "Weapon_Pistol.Empty" )
+		self:Reload()
+		self:SetNextPrimaryFire(CurTime() + 0.25)
+		
+		self.LastShot = CurTime()
+		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
 
-	local AimMod = self:GetAimMod()
+		return false
+	end
+	
 	local Punch = self:GetPunch()
-
+	self:Recoil(Punch)
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+	
+	if not self:CanPrimaryAttack() then return end
+	
+	local Ply = self:GetOwner()
+	local AimMod = self:GetAimMod()
+	
 	if SERVER then
 		local Aim = self:ResolveAim()
 		local Right = Aim:Right()
@@ -100,7 +114,6 @@ function SWEP:PrimaryAttack()
 
 		self:ShootBullet(Ply:GetShootPos(),Dir)
 
-		self:Recoil(Punch)
 	end
 
 	self:PostShot(1)
