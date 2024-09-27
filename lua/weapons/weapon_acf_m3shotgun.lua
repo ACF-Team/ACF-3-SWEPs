@@ -110,11 +110,25 @@ end
 function SWEP:PrimaryAttack()
 	if self.Reloading and self:Clip1() > 0 then self:FinishReload() return end
 
-	if not self:CanPrimaryAttack() then return end
-	local Ply = self:GetOwner()
+	if self:Clip1() <= 0 then
+		self:EmitSound( "Weapon_Pistol.Empty" )
+		self:Reload()
+		self:SetNextPrimaryFire(CurTime() + 0.25)
 
-	local AimMod = self:GetAimMod()
+		self.LastShot = CurTime()
+		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+
+		return false
+	end
+
 	local Punch = self:GetPunch()
+	self:Recoil(Punch)
+	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
+
+	if not self:CanPrimaryAttack() then return end
+
+	local Ply = self:GetOwner()
+	local AimMod = self:GetAimMod()
 
 	if SERVER then
 		local Aim = self:ResolveAim()
@@ -135,7 +149,6 @@ function SWEP:PrimaryAttack()
 			self:ShootBullet(Ply:GetShootPos(),AimSpread)
 		end
 
-		self:Recoil(Punch)
 	end
 
 	self:PostShot(1)
