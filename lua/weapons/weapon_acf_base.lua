@@ -553,16 +553,17 @@ function SWEP:CalcDropTable()
 end
 
 function SWEP:Recoil(PunchAmt)
-IFTP = IsFirstTimePredicted()
-	if self.Owner:IsPlayer() and (self.Owner:IsSprinting() and (self.Owner:GetAbsVelocity():LengthSqr() > 10000)) then return false end
+	local IFTP = IsFirstTimePredicted()
+	local Ply = self:GetOwner()
+	if Ply:IsPlayer() and (Ply:IsSprinting() and (Ply:GetAbsVelocity():LengthSqr() > 10000)) then return false end
 	if (SP and SERVER) or (not SP and CLIENT and IFTP) then
-		ang = self.Owner:EyeAngles()
+		local ang = self.Owner:EyeAngles()
 		ang.p = ang.p - self.RecoilMod * 0.5
 		ang.y = ang.y + math.Rand(-1, 1) * self.RecoilMod * 0.5
 
-		self.Owner:SetEyeAngles(ang)
+		Ply:SetEyeAngles(ang)
 	end
-	self.Owner:ViewPunch(PunchAmt)
+	Ply:ViewPunch(PunchAmt)
 end
 
 if CLIENT then
