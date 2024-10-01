@@ -557,7 +557,7 @@ function SWEP:Recoil(PunchAmt)
 	local Ply = self:GetOwner()
 	if Ply:IsPlayer() and (Ply:IsSprinting() and (Ply:GetAbsVelocity():LengthSqr() > 10000)) then return false end
 	if (SP and SERVER) or (not SP and CLIENT and IFTP) then
-		local ang = self.Owner:EyeAngles()
+		local ang = Ply:EyeAngles()
 		ang.p = ang.p - self.RecoilMod * 0.5
 		ang.y = ang.y + math.Rand(-1, 1) * self.RecoilMod * 0.5
 
