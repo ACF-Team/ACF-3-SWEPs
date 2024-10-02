@@ -6,7 +6,7 @@ include("weapon_acf_base.lua")
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Panzerschreck"
 
-SWEP.IconOffset				= Vector(-2,-8,0)
+SWEP.IconOffset				= Vector(-2, -8, 0)
 SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = true
@@ -66,11 +66,11 @@ SWEP.Tracer                 = 0
 SWEP.IronScale              = 0
 SWEP.NextIronToggle         = 0
 
-SWEP.IronSightPos           = Vector(-7.4,0,5.45)
-SWEP.IronSightAng           = Angle(0.1,0.285,0)
+SWEP.IronSightPos           = Vector(-7.4, 0, 5.45)
+SWEP.IronSightAng           = Angle(0.1, 0.285, 0)
 SWEP.PitchAdjust			= 0
 
-SWEP.SprintAng				= Angle(-5,-10,0) -- The angle the viewmodel turns to when the player is sprinting
+SWEP.SprintAng				= Angle(-5, -10, 0) -- The angle the viewmodel turns to when the player is sprinting
 
 SWEP.UseHands				= false
 
@@ -82,8 +82,8 @@ SWEP.AimAnim				= ACT_VM_DEPLOY
 SWEP.IdleAnim				= ACT_VM_UNDEPLOY
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
-SWEP.OffsetWorldModelPos	= Vector(0,0,1)
-SWEP.OffsetWorldModelAng	= Angle(10,0,180)
+SWEP.OffsetWorldModelPos	= Vector(0, 0, 1)
+SWEP.OffsetWorldModelAng	= Angle(10, 0, 180)
 
 SWEP.FakeFire				= true	-- This shakes the aim bloom so you can't just quickshot to victory
 SWEP.MoveBloom				= 2
@@ -95,8 +95,8 @@ SWEP:SetupACFBullet()
 
 function SWEP:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
-	if self:GetNWBool("iron",false) == false and self:GetOwner():IsPlayer() then
-		self:GetOwner():PrintMessage(4,"You have to aim first!")
+	if self:GetNWBool("iron", false) == false and self:GetOwner():IsPlayer() then
+		self:GetOwner():PrintMessage(4, "You have to aim first!")
 		return
 	end
 	local Ply = self:GetOwner()
@@ -114,7 +114,7 @@ function SWEP:PrimaryAttack()
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 		local Dir = (Aim:Forward() + Spread):GetNormalized()
 
-		self:ShootBullet(Ply:GetShootPos(),(Dir:Angle() + Angle(self.PitchAdjust,0,0)):Forward())
+		self:ShootBullet(Ply:GetShootPos(), (Dir:Angle() + Angle(self.PitchAdjust, 0, 0)):Forward())
 
 		self:Recoil(Punch)
 	end

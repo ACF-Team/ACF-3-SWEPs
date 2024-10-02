@@ -5,8 +5,8 @@ include("weapon_acf_base.lua")
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Anti-Material Rifle"
 
-SWEP.IconOffset				= Vector(4,4,0)
-SWEP.IconAngOffset			= Angle(0,180,0)
+SWEP.IconOffset				= Vector(4, 4, 0)
+SWEP.IconAngOffset			= Angle(0, 180, 0)
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/v_sniper.mdl"
@@ -47,7 +47,7 @@ SWEP.Tracer                 = 1
 
 SWEP.IronScale              = 0
 SWEP.NextIronToggle         = 0
-SWEP.IronSightPos           = Vector(-5.775,-4,0.92)
+SWEP.IronSightPos           = Vector(-5.775, -4, 0.92)
 --SWEP.IronSightAng           = Angle()
 
 SWEP.Scope					= true
@@ -71,7 +71,7 @@ function SWEP:PrimaryAttack()
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 
 		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
 
 		return false
 	end

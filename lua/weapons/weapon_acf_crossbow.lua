@@ -5,7 +5,7 @@ include("weapon_acf_base.lua")
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Rebar Crossbow"
 
-SWEP.IconOffset				= Vector(-8,0,0)
+SWEP.IconOffset				= Vector(-8, 0, 0)
 SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = true
@@ -47,7 +47,7 @@ SWEP.BulletScale			= 1
 
 SWEP.IronScale              = 0
 SWEP.NextIronToggle         = 0
-SWEP.IronSightPos           = Vector(-8,-8,2)
+SWEP.IronSightPos           = Vector(-8, -8, 2)
 --SWEP.IronSightAng           = Angle()
 
 SWEP.Scope					= true
@@ -67,7 +67,7 @@ function SWEP:PrimaryAttack()
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 
 		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
 
 		return false
 	end
@@ -91,9 +91,9 @@ function SWEP:PrimaryAttack()
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 		local Dir = (Aim:Forward() + Spread):GetNormalized()
 
-		self:ShootBullet(Ply:GetShootPos(),Dir)
+		self:ShootBullet(Ply:GetShootPos(), Dir)
 	else
-		timer.Simple(self.Primary.Delay * 0.8,function() self.TempOut = false end)
+		timer.Simple(self.Primary.Delay * 0.8, function() self.TempOut = false end)
 	end
 
 	self:PostShot(1)
@@ -103,10 +103,10 @@ end
 function SWEP:Reload()
 	local DidReload = self:DefaultReload( ACT_VM_RELOAD ) -- If this is successful, SWEP:Think doesn't run, so we have to handle anything that should happen in there
 	if DidReload and not self.Reloading then
-		self:SetNWBool("iron",false)
-		timer.Simple(self:SequenceDuration() * 0.9,function() self.Reloading = false end)
+		self:SetNWBool("iron", false)
+		timer.Simple(self:SequenceDuration() * 0.9, function() self.Reloading = false end)
 		self:EmitSound("Weapon_Crossbow.Reload")
-		timer.Simple(0.62,function() self:EmitSound("Weapon_Crossbow.BoltElectrify") end)
+		timer.Simple(0.62, function() self:EmitSound("Weapon_Crossbow.BoltElectrify") end)
 	end
 	self.Reloading = DidReload
 end

@@ -2,7 +2,7 @@ AddCSLuaFile()
 
 -- i'd joke about there being pain involved in making this, but in reality i made a script to do this for me
 
-local pt = {98,102}
+local pt = {98, 102}
 
 sound.Add({name = "Weapon_30cal.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^30cal/30cal_shoot.wav"})
 sound.Add({name = "Weapon_30cal.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "30cal/30cal_boltback.wav"})

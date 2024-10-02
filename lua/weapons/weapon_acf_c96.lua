@@ -6,7 +6,7 @@ include("weapon_acf_base.lua")
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF C96"
 
-SWEP.IconOffset				= Vector(0,0,0)
+SWEP.IconOffset				= Vector(0, 0, 0)
 SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = false
@@ -47,14 +47,14 @@ SWEP.Tracer                 = 0
 
 SWEP.IronScale              = 0
 SWEP.NextIronToggle         = 0
-SWEP.IronSightPos           = Vector(-6.3,-4,3.2)
-SWEP.IronSightAng           = Angle(0,-0.2,0)
+SWEP.IronSightPos           = Vector(-6.3, -4, 3.2)
+SWEP.IronSightAng           = Angle(0, -0.2, 0)
 
-SWEP.SprintAng				= Angle(-5,10,0) -- The angle the viewmodel turns to when the player is sprinting
+SWEP.SprintAng				= Angle(-5, 10, 0) -- The angle the viewmodel turns to when the player is sprinting
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
-SWEP.OffsetWorldModelPos	= Vector(0,0,1)
-SWEP.OffsetWorldModelAng	= Angle(10,0,180)
+SWEP.OffsetWorldModelPos	= Vector(0, 0, 1)
+SWEP.OffsetWorldModelAng	= Angle(10, 0, 180)
 
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 3
@@ -68,7 +68,7 @@ function SWEP:PrimaryAttack()
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 
 		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
 
 		return false
 	end
@@ -92,7 +92,7 @@ function SWEP:PrimaryAttack()
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 		local Dir = (Aim:Forward() + Spread):GetNormalized()
 
-		self:ShootBullet(Ply:GetShootPos(),Dir)
+		self:ShootBullet(Ply:GetShootPos(), Dir)
 
 	end
 

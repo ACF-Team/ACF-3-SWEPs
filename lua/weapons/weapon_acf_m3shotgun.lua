@@ -46,7 +46,7 @@ SWEP.Tracer                 = 0
 
 SWEP.IronScale              = 0
 SWEP.NextIronToggle         = 0
-SWEP.IronSightPos           = Vector(-7.65,-8,3.48)
+SWEP.IronSightPos           = Vector(-7.65, -8, 3.48)
 --SWEP.IronSightAng           = Angle()
 
 -- Overrides the Spread variable used in drawing the crosshair
@@ -81,7 +81,7 @@ function SWEP:DoReload()
 		self:SendWeaponAnim(ACT_VM_RELOAD)
 
 		self:SetNextPrimaryFire(CurTime() + self:SequenceDuration())
-		timer.Simple(self:SequenceDuration(),function() if self.Reloading then self:SetClip1(self:Clip1() + 1) self:GetOwner():RemoveAmmo(1,self.Primary.Ammo) self:DoReload() end end)
+		timer.Simple(self:SequenceDuration(), function() if self.Reloading then self:SetClip1(self:Clip1() + 1) self:GetOwner():RemoveAmmo(1, self.Primary.Ammo) self:DoReload() end end)
 
 		self.NextShell = (CurTime() + self:SequenceDuration())
 	else
@@ -98,7 +98,7 @@ end
 function SWEP:Holster()
 	if not IsFirstTimePredicted() then return end
 
-	self:SetNWBool("iron",false)
+	self:SetNWBool("iron", false)
 	self.IronScale = 0
 	self.IronToggle = false
 
@@ -116,7 +116,7 @@ function SWEP:PrimaryAttack()
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 
 		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
 
 		return false
 	end
@@ -146,7 +146,7 @@ function SWEP:PrimaryAttack()
 			local BSpread = BrandUnitSquare:GetNormalized() * BCone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 			local AimSpread = (Dir + BSpread):GetNormalized()
 
-			self:ShootBullet(Ply:GetShootPos(),AimSpread)
+			self:ShootBullet(Ply:GetShootPos(), AimSpread)
 		end
 
 	end
