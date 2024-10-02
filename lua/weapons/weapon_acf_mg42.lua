@@ -6,7 +6,7 @@ include("weapon_acf_base.lua")
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF MG42"
 
-SWEP.IconOffset				= Vector(-16,-4,6)
+SWEP.IconOffset				= Vector(-16, -4, 6)
 SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = true
@@ -44,14 +44,14 @@ SWEP.Tracer                 = 1
 
 SWEP.IronScale              = 0
 SWEP.NextIronToggle         = 0
-SWEP.IdlePos				= Vector(2,0,-4)
-SWEP.IronSightPos           = Vector(0,0,-2)
---SWEP.IronSightAng           = Angle(0,0,0)
+SWEP.IdlePos				= Vector(2, 0, -4)
+SWEP.IronSightPos           = Vector(0, 0, -2)
+--SWEP.IronSightAng           = Angle(0, 0, 0)
 SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
-SWEP.OffsetWorldModelPos	= Vector(0,0,1.5)
-SWEP.OffsetWorldModelAng	= Angle(10,0,180)
+SWEP.OffsetWorldModelPos	= Vector(0, 0, 1.5)
+SWEP.OffsetWorldModelAng	= Angle(10, 0, 180)
 
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 1
@@ -66,15 +66,15 @@ function SWEP:Reload()
 	if self:GetSequenceActivity(self:GetSequence()) == ACT_VM_RELOAD then return end
 	if self:Clip1() == self.Primary.ClipSize then return end
 	if self:Ammo1() == 0 then return false end
-	self:SetNWBool("iron",false)
+	self:SetNWBool("iron", false)
 	self:SendWeaponAnim(ACT_VM_RELOAD)
-	local RoundsMissing = math.min(self.Primary.ClipSize - self:Clip1(),self:Ammo1())
+	local RoundsMissing = math.min(self.Primary.ClipSize - self:Clip1(), self:Ammo1())
 	self.Reloading = true
-	timer.Simple(self:SequenceDuration(),function()
+	timer.Simple(self:SequenceDuration(), function()
 		if self:GetOwner():GetActiveWeapon() ~= self then self.Reloading = false return end
 		self:SendWeaponAnim(ACT_VM_IDLE)
-		self:SetClip1(math.Clamp(self:Clip1() + self:Ammo1(),0,self.Primary.ClipSize))
-		self:GetOwner():RemoveAmmo(RoundsMissing,self.Primary.Ammo)
+		self:SetClip1(math.Clamp(self:Clip1() + self:Ammo1(), 0, self.Primary.ClipSize))
+		self:GetOwner():RemoveAmmo(RoundsMissing, self.Primary.Ammo)
 		self.Reloading = false
 	end)
 end
@@ -86,7 +86,7 @@ function SWEP:PrimaryAttack()
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 
 		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
 
 		return false
 	end
@@ -110,9 +110,9 @@ function SWEP:PrimaryAttack()
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 		local Dir = (Aim:Forward() + Spread):GetNormalized()
 
-		if self:Clip1() % 3 == 1 then self:SetNW2Float("Tracer",self.Tracer) else self:SetNW2Float("Tracer",0) end
+		if self:Clip1() % 3 == 1 then self:SetNW2Float("Tracer", self.Tracer) else self:SetNW2Float("Tracer", 0) end
 
-		self:ShootBullet(Ply:GetShootPos(),Dir)
+		self:ShootBullet(Ply:GetShootPos(), Dir)
 
 	end
 
