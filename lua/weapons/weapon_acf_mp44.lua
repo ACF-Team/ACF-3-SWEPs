@@ -6,7 +6,7 @@ include("weapon_acf_base.lua")
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF MP44"
 
-SWEP.IconOffset				= Vector(-10,4,4)
+SWEP.IconOffset				= Vector(-10, 4, 4)
 SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = true
@@ -45,13 +45,13 @@ SWEP.Tracer                 = 0
 
 SWEP.IronScale              = 0
 SWEP.NextIronToggle         = 0
-SWEP.IronSightPos           = Vector(-3.575,-7,1.64)
-SWEP.IronSightAng           = Angle(-0.45,0.35,0)
+SWEP.IronSightPos           = Vector(-3.575, -7, 1.64)
+SWEP.IronSightAng           = Angle(-0.45, 0.35, 0)
 SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
-SWEP.OffsetWorldModelPos	= Vector(0,0,1.5)
-SWEP.OffsetWorldModelAng	= Angle(10,0,180)
+SWEP.OffsetWorldModelPos	= Vector(0, 0, 1.5)
+SWEP.OffsetWorldModelAng	= Angle(10, 0, 180)
 
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 3
@@ -66,7 +66,7 @@ function SWEP:PrimaryAttack()
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 
 		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
 
 		return false
 	end
@@ -90,7 +90,7 @@ function SWEP:PrimaryAttack()
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 		local Dir = (Aim:Forward() + Spread):GetNormalized()
 
-		self:ShootBullet(Ply:GetShootPos(),Dir)
+		self:ShootBullet(Ply:GetShootPos(), Dir)
 
 	end
 

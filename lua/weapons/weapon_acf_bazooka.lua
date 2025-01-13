@@ -6,7 +6,7 @@ include("weapon_acf_base.lua")
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Bazooka"
 
-SWEP.IconOffset				= Vector(4,-4,0)
+SWEP.IconOffset				= Vector(4, -4, 0)
 SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = true
@@ -53,7 +53,7 @@ SWEP.ACFHEATLinerMass		= 0.094189
 SWEP.ACFHEATPropMass		= 0.040291
 SWEP.ACFHEATCartMass		= 1.21695
 SWEP.ACFHEATCasingMass		= 0.699373
--- I mean what the actual fuck, why can't I just call a single function to build this fucking data
+-- I mean what the actual fuck,  why can't I just call a single function to build this fucking data
 SWEP.ACFHEATJetMass			= 0.046411
 SWEP.ACFHEATJetMinVel		= 4148.51
 SWEP.ACFHEATJetMaxVel		= 8227.45
@@ -66,11 +66,11 @@ SWEP.IronScale              = 0
 SWEP.NextIronToggle         = 0
 
 SWEP.AimTable = {}
-SWEP.AimTable[1] = {IronPos = Vector(-3.83,-8,-0.4),IronAng = Angle(2.9,-0.5,0), PitchAdjust = -1.55,Text = "100yd"} -- 100yd
-SWEP.AimTable[2] = {IronPos = Vector(-3.79,-8,-1.9),IronAng = Angle(6.9,-0.4,0), PitchAdjust = -4.2,Text = "200yd"} -- 200yd
-SWEP.AimTable[3] = {IronPos = Vector(-3.77,-8,-3.64),IronAng = Angle(11.6,-0.35,0), PitchAdjust = -6.6,Text = "300yd"} -- 300yd
+SWEP.AimTable[1] = {IronPos = Vector(-3.83, -8, -0.4), IronAng = Angle(2.9, -0.5, 0),  PitchAdjust = -1.55, Text = "100yd"} -- 100yd
+SWEP.AimTable[2] = {IronPos = Vector(-3.79, -8, -1.9), IronAng = Angle(6.9, -0.4, 0),  PitchAdjust = -4.2, Text = "200yd"} -- 200yd
+SWEP.AimTable[3] = {IronPos = Vector(-3.77, -8, -3.64), IronAng = Angle(11.6, -0.35, 0),  PitchAdjust = -6.6, Text = "300yd"} -- 300yd
 
-SWEP.SprintAng				= Angle(-5,-10,0) -- The angle the viewmodel turns to when the player is sprinting
+SWEP.SprintAng				= Angle(-5, -10, 0) -- The angle the viewmodel turns to when the player is sprinting
 
 SWEP.UseHands				= false
 
@@ -81,11 +81,11 @@ SWEP.CustomAnim				= true
 SWEP.AimAnim				= ACT_VM_DEPLOY
 SWEP.IdleAnim				= ACT_VM_UNDEPLOY
 
-SWEP.SprintAng				= Angle(-10,-10,0) -- The angle the viewmodel turns to when the player is sprinting
+SWEP.SprintAng				= Angle(-10, -10, 0) -- The angle the viewmodel turns to when the player is sprinting
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
-SWEP.OffsetWorldModelPos	= Vector(0,0,1)
-SWEP.OffsetWorldModelAng	= Angle(10,0,180)
+SWEP.OffsetWorldModelPos	= Vector(0, 0, 1)
+SWEP.OffsetWorldModelAng	= Angle(10, 0, 180)
 
 SWEP.FakeFire				= true	-- This shakes the aim bloom so you can't just quickshot to victory
 SWEP.MoveBloom				= 2
@@ -97,8 +97,8 @@ SWEP:SetupACFBullet()
 
 function SWEP:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
-	if self:GetNWBool("iron",false) == false and self:GetOwner():IsPlayer() then
-		self:GetOwner():PrintMessage(4,"You have to aim first!")
+	if self:GetNWBool("iron", false) == false and self:GetOwner():IsPlayer() then
+		self:GetOwner():PrintMessage(4, "You have to aim first!")
 		return
 	end
 	local Ply = self:GetOwner()
@@ -116,7 +116,7 @@ function SWEP:PrimaryAttack()
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 		local Dir = (Aim:Forward() + Spread):GetNormalized()
 
-		self:ShootBullet(Ply:GetShootPos(),(Dir:Angle() + Angle(self.AimTable[self:GetNW2Int("aimsetting",1)].PitchAdjust,0,0)):Forward())
+		self:ShootBullet(Ply:GetShootPos(), (Dir:Angle() + Angle(self.AimTable[self:GetNW2Int("aimsetting", 1)].PitchAdjust, 0, 0)):Forward())
 
 		self:Recoil(Punch)
 	end
@@ -130,10 +130,10 @@ function SWEP:SecondaryAttack()
 	if Owner:KeyDown(IN_USE) and (CurTime() > self.NextAttack2Toggle) then
 
 		if SERVER then
-			local cursetting = self:GetNW2Int("aimsetting",1)
+			local cursetting = self:GetNW2Int("aimsetting", 1)
 			if (cursetting + 1) > #self.AimTable then cursetting = 1 else cursetting = cursetting + 1 end
-			self:SetNW2Int("aimsetting",cursetting)
-			self:GetOwner():PrintMessage(4,self.AimTable[cursetting].Text)
+			self:SetNW2Int("aimsetting", cursetting)
+			self:GetOwner():PrintMessage(4, self.AimTable[cursetting].Text)
 		else
 			self:EmitSound(FiremodeSound)
 		end
@@ -147,6 +147,6 @@ end
 
 if CLIENT then
 	function SWEP:GetViewAim()
-		return self.AimTable[self:GetNW2Int("aimsetting",1)]
+		return self.AimTable[self:GetNW2Int("aimsetting", 1)]
 	end
 end

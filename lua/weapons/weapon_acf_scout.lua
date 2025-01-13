@@ -42,7 +42,7 @@ SWEP.CalcDistance2			= 300
 
 SWEP.IronScale              = 0
 SWEP.NextIronToggle         = 0
-SWEP.IronSightPos           = Vector(-6.65,-10,3.35)
+SWEP.IronSightPos           = Vector(-6.65, -10, 3.35)
 --SWEP.IronSightAng           = Angle()
 
 SWEP.Scope					= true
@@ -62,7 +62,7 @@ function SWEP:PrimaryAttack()
 		self:SetNextPrimaryFire(CurTime() + 0.25)
 
 		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot",self.LastShot) end
+		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
 
 		return false
 	end
@@ -86,10 +86,10 @@ function SWEP:PrimaryAttack()
 		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
 		local Dir = (Aim:Forward() + Spread):GetNormalized()
 
-		self:ShootBullet(Ply:GetShootPos(),Dir)
+		self:ShootBullet(Ply:GetShootPos(), Dir)
 	else
 		self.TempOut = true
-		timer.Simple(self.Primary.Delay * 0.8,function() self.TempOut = false end)
+		timer.Simple(self.Primary.Delay * 0.8, function() self.TempOut = false end)
 	end
 
 	self:PostShot(1)
