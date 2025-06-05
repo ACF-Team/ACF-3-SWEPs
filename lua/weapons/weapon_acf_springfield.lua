@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF M1903 Springfield"
 SWEP.IconOffset				= Vector(-14, 0, 2)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/springfield/v_springfield.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
 SWEP.ShotSound				= Sound("Weapon_Springfield.Shoot")
 SWEP.WorldModel             = "models/weapons/springfield/w_spring.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
@@ -45,12 +42,9 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 850 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IdlePos				= Vector(0, -6, -2)
 SWEP.IronSightPos           = Vector(-5.35, -10, 1.05)
 --SWEP.IronSightAng           = Angle(0.0, 0, 0)
-SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0, 0, 1.5)

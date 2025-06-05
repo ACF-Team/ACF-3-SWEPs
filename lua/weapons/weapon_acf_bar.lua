@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF M1918 BAR"
 SWEP.IconOffset				= Vector(-16, 0, 0)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/bar/v_bar.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
 SWEP.ShotSound				= Sound("Weapon_Bar.Shoot")
 SWEP.WorldModel             = "models/weapons/bar/w_bar.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -43,12 +40,9 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 860 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IdlePos				= Vector(0, 0, 2)
 SWEP.IronSightPos           = Vector(-6.26, 0, 5.55)
 --SWEP.IronSightAng           = Angle(0, 0, 0)
-SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0.75, 0.25, 1.5)

@@ -8,13 +8,10 @@ SWEP.PrintName              = "ACF Glock 18"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_pist_glock18.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/glock/glock18-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_glock18.mdl"
 SWEP.HoldType               = "revolver"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
@@ -42,8 +39,6 @@ SWEP.Tracer                 = 0
 SWEP.CalcDistance			= 25
 SWEP.CalcDistance2			= 50
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-5.78, 0, 2.6)
 --SWEP.IronSightAng           = Angle(0, -0.2, 0)
 

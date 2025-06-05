@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF Panzerschreck"
 SWEP.IconOffset				= Vector(-2, -8, 0)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/panzerschreck/v_panzerschreck.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 45
 
 SWEP.ShotSound				= Sound("Weapon_Panzerschreck.Shoot")
 SWEP.WorldModel             = "models/weapons/panzerschreck/w_pschreck.mdl"
 SWEP.HoldType               = "rpg"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 4
 SWEP.SlotPos                = 0
@@ -63,16 +60,11 @@ SWEP.ACFMuzzleVel           = 110 -- m/s of bullet leaving the barrel
 SWEP.ACFProjLen				= 13.1
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
-
 SWEP.IronSightPos           = Vector(-7.4, 0, 5.45)
 SWEP.IronSightAng           = Angle(0.1, 0.285, 0)
 SWEP.PitchAdjust			= 0
 
 SWEP.SprintAng				= Angle(-5, -10, 0) -- The angle the viewmodel turns to when the player is sprinting
-
-SWEP.UseHands				= false
 
 SWEP.AimFocused				= 0.0
 SWEP.AimUnfocused			= 5

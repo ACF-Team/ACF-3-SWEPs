@@ -8,13 +8,10 @@ SWEP.PrintName              = "ACF AK47"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_rif_ak47.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/ak47/ak47-1.wav")
 SWEP.WorldModel             = "models/weapons/w_rif_ak47.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -39,8 +36,6 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 715 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 1
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-6.57, -7, 2.25)
 SWEP.IronSightAng           = Angle(2.25, 0, 1)
 

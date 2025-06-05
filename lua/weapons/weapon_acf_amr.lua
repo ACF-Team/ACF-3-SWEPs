@@ -8,15 +8,12 @@ SWEP.PrintName              = "ACF Anti-Material Rifle"
 SWEP.IconOffset				= Vector(4, 4, 0)
 SWEP.IconAngOffset			= Angle(0, 180, 0)
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/v_sniper.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")acf_base/weapons/sniper_fire.mp3")
 SWEP.WorldModel             = "models/weapons/w_sniper.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 4
 SWEP.SlotPos                = 0
@@ -45,8 +42,6 @@ SWEP.ACFType                = "APDS"
 SWEP.ACFMuzzleVel           = 700 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 1
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-5.775, -4, 0.92)
 --SWEP.IronSightAng           = Angle()
 
@@ -57,8 +52,6 @@ SWEP.Recovery				= 0.2
 
 SWEP.AimFocused				= 0.1
 SWEP.AimUnfocused			= 3
-
-SWEP.UseHands				= false
 
 SWEP:SetupACFBullet()
 

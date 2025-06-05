@@ -7,13 +7,10 @@ SWEP.PrintName              = "ACF G3SG1"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_snip_g3sg1.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/g3sg1/g3sg1-1.wav")
 SWEP.WorldModel             = "models/weapons/w_snip_g3sg1.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
@@ -41,8 +38,6 @@ SWEP.Tracer                 = 0
 SWEP.CalcDistance			= 100
 SWEP.CalcDistance2			= 300
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-6.2, -10, 1.9)
 --SWEP.IronSightAng           = Angle()
 

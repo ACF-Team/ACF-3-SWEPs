@@ -10,13 +10,10 @@ SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/c_crossbow.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound("Weapon_Crossbow.Single")
 SWEP.WorldModel             = "models/weapons/w_crossbow.mdl"
 SWEP.HoldType               = "crossbow"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 4
 SWEP.SlotPos                = 0
@@ -45,8 +42,6 @@ SWEP.Tracer                 = 0
 SWEP.BulletModel			= "models/crossbow_bolt.mdl"
 SWEP.BulletScale			= 1
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-8, -8, 2)
 --SWEP.IronSightAng           = Angle()
 

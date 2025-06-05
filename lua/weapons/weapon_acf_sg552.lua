@@ -10,13 +10,10 @@ SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_rif_sg552.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/sg552/sg552-1.wav")
 SWEP.WorldModel             = "models/weapons/w_rif_sg552.mdl"
 SWEP.HoldType               = "smg"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -47,8 +44,6 @@ SWEP.Tracer                 = 1
 SWEP.Scope					= true
 SWEP.Zoom					= 4
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-7.9, -2, 2.5)
 SWEP.IronSightAng           = Angle(0, 0, 0)
 

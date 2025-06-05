@@ -6,17 +6,12 @@ include("weapon_acf_base.lua")
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF P90"
 
-
-
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_smg_p90.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/p90/p90-1.wav")
 SWEP.WorldModel             = "models/weapons/w_smg_p90.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 2
 SWEP.SlotPos                = 0
@@ -44,8 +39,6 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 715 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-5.78, -15, 2.2)
 SWEP.IronSightAng           = Angle(0, -0.2, 0)
 

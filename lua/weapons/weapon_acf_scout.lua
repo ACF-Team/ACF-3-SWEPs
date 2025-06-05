@@ -7,13 +7,10 @@ SWEP.PrintName              = "ACF Scout"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_snip_scout.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/scout/scout_fire-1.wav")
 SWEP.WorldModel             = "models/weapons/w_snip_scout.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
@@ -40,8 +37,6 @@ SWEP.Tracer                 = 0
 SWEP.CalcDistance			= 100
 SWEP.CalcDistance2			= 300
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-6.65, -10, 3.35)
 --SWEP.IronSightAng           = Angle()
 

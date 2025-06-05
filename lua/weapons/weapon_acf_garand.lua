@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF Garand"
 SWEP.IconOffset				= Vector(-16, 0, 0)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/garand/v_garand.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
 SWEP.ShotSound				= Sound("Weapon_Garand.Shoot")
 SWEP.WorldModel             = "models/weapons/garand/w_garand.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
@@ -42,11 +39,8 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 850 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-6.95, -2, 5.1)
 --SWEP.IronSightAng           = Angle()
-SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0, 0, 1.5)

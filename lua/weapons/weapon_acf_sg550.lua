@@ -7,13 +7,10 @@ SWEP.PrintName              = "ACF SG550 Commando"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_snip_sg550.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/sg550/sg550-1.wav")
 SWEP.WorldModel             = "models/weapons/w_snip_sg550.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -41,8 +38,6 @@ SWEP.Tracer                 = 0
 SWEP.CalcDistance			= 100
 SWEP.CalcDistance2			= 300
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-7.5, -10, 1.5)
 --SWEP.IronSightAng           = Angle()
 

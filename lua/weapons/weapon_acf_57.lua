@@ -7,13 +7,10 @@ SWEP.PrintName              = "ACF Five-SeveN"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_pist_fiveseven.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/fiveseven/fiveseven-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_fiveseven.mdl"
 SWEP.HoldType               = "pistol"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
@@ -40,8 +37,6 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 715 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-5.95, 0, 2.75)
 --SWEP.IronSightAng           = Angle(0, -0.2, 0)
 

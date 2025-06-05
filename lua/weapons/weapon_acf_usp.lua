@@ -6,16 +6,12 @@ include("weapon_acf_base.lua")
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF USP"
 
-
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_pist_usp.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/usp/usp_unsil-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_usp.mdl"
 SWEP.HoldType               = "pistol"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
@@ -42,8 +38,6 @@ SWEP.Tracer                 = 0
 SWEP.CalcDistance			= 25
 SWEP.CalcDistance2			= 50
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-5.925, 0, 2.45)
 --SWEP.IronSightAng           = Angle(0, -0.2, 0)
 

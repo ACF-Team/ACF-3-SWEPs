@@ -8,13 +8,10 @@ SWEP.PrintName              = "ACF M4A1"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_rif_m4a1.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/m4a1/m4a1_unsil-1.wav")
 SWEP.WorldModel             = "models/weapons/w_rif_m4a1.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -39,8 +36,6 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 800 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 1
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-7.85, -5, -0.2)
 SWEP.IronSightAng           = Angle(2, -1.5, -4)
 

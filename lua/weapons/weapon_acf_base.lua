@@ -122,7 +122,7 @@ SWEP.DisableDuplicator		= true -- why oh why do I even have to do this
 SWEP.RateTime				= 0
 SWEP.Reloading				= false
 
-SWEP.IconOverride			= "materials/acf_logo.png"
+SWEP.IconOverride			= "materials/vgui/entities/acf_logo.png"
 local FiremodeSound = Sound("Weapon_SMG1.Special2")
 
 function SWEP:SetupACFBullet()

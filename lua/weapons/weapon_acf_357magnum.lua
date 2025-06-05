@@ -11,13 +11,10 @@ SWEP.IconAngOffset			= Angle(4, 0, 0)
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/c_357.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound("Weapon_357.Single")
 SWEP.WorldModel             = "models/weapons/w_357.mdl"
 SWEP.HoldType               = "revolver"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
@@ -41,8 +38,6 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 450 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-4.71, -6, 0.62)
 SWEP.IronSightAng           = Angle(0, -0.2, 0)
 

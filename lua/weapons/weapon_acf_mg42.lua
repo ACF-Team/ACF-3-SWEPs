@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF MG42"
 SWEP.IconOffset				= Vector(-16, -4, 6)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/mg42/v_mg42.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
 SWEP.ShotSound				= Sound("Weapon_Mg42.Shoot")
 SWEP.WorldModel             = "models/weapons/mg42/w_mg42bd.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -42,12 +39,9 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 740 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 1
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IdlePos				= Vector(2, 0, -4)
 SWEP.IronSightPos           = Vector(0, 0, -2)
 --SWEP.IronSightAng           = Angle(0, 0, 0)
-SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0, 0, 1.5)

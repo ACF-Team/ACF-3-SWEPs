@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF M1 Thompson"
 SWEP.IconOffset				= Vector(-4, 0, 4)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/thompson/v_thompson.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
 SWEP.ShotSound				= Sound("Weapon_Thompson.Shoot")
 SWEP.WorldModel             = "models/weapons/thompson/w_thompson.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 2
 SWEP.SlotPos                = 0
@@ -46,12 +43,9 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 285 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IdlePos				= Vector(0, -2, -2)
 SWEP.IronSightPos           = Vector(-4.52, -4, 2.04)
 SWEP.IronSightAng           = Angle(0, 0, 0)
-SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0.75, 0.25, 1.5)

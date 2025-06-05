@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF M1 Carbine"
 SWEP.IconOffset				= Vector(-10, 6, 2)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/m1carbine/v_m1carbine.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
 SWEP.ShotSound				= Sound("Weapon_Carbine.Shoot")
 SWEP.WorldModel             = "models/weapons/m1carbine/w_m1carb.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
@@ -42,12 +39,9 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 610 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IdlePos				= Vector(0, -6, 0)
 SWEP.IronSightPos           = Vector(-6.845, -10, 3.3)
 --SWEP.IronSightAng           = Angle(0.0, 0, 0)
-SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0.5, 0.5, 1.5)

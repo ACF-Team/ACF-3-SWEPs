@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF MP40"
 SWEP.IconOffset				= Vector(-10, 6, 4)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/mp40/v_mp40.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
 SWEP.ShotSound				= Sound("Weapon_Mp40.Shoot")
 SWEP.WorldModel             = "models/weapons/mp40/w_mp40.mdl"
 SWEP.HoldType               = "smg"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -43,12 +40,9 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 400 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IdlePos				= Vector(0, -6, 0)
 SWEP.IronSightPos           = Vector(-4.425, -6, 1.8)
 SWEP.IronSightAng           = Angle(0.325, -0.1, 0)
-SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0, 0, 1.5)

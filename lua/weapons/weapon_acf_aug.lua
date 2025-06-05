@@ -10,13 +10,10 @@ SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_rif_aug.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/aug/aug-1.wav")
 SWEP.WorldModel             = "models/weapons/w_rif_aug.mdl"
 SWEP.HoldType               = "smg"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -44,8 +41,6 @@ SWEP.Tracer                 = 1
 SWEP.Scope					= true
 SWEP.Zoom					= 2
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-8.35, -2, 2.1)
 SWEP.IronSightAng           = Angle(0, -3, 0)
 

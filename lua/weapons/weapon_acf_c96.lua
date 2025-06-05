@@ -11,14 +11,11 @@ SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/c96/v_c96.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
 SWEP.ShotSound				= Sound("Weapon_C96.Shoot") -- wrong one, I know, but the normal sound is shitty
 SWEP.WorldModel             = "models/weapons/c96/w_c96.mdl"
 SWEP.HoldType               = "pistol"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
@@ -45,8 +42,6 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 425 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-6.3, -4, 3.2)
 SWEP.IronSightAng           = Angle(0, -0.2, 0)
 

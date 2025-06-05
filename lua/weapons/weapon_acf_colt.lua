@@ -11,14 +11,11 @@ SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/colt/v_colt.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 55
 
 SWEP.ShotSound				= Sound("Weapon_Colt.Shoot")
 SWEP.WorldModel             = "models/weapons/colt/w_colt.mdl"
 SWEP.HoldType               = "pistol"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
@@ -45,8 +42,6 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 255 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-3.85, 0, 3.55)
 SWEP.IronSightAng           = Angle(0.5, 0, 0)
 

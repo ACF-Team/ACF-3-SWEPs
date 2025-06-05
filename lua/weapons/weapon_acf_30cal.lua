@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF M1919"
 SWEP.IconOffset				= Vector(-22, -8, 6)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/30cal/v_30cal.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 75
 
 SWEP.ShotSound				= Sound("Weapon_30cal.Shoot")
 SWEP.WorldModel             = "models/weapons/30cal/w_30cal.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -42,12 +39,9 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 815 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 1
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IdlePos				= Vector(2, 0, -4)
 SWEP.IronSightPos           = Vector(-2, -4, 2)
 --SWEP.IronSightAng           = Angle(0, 0, 0)
-SWEP.UseHands				= false
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0, 1, -2)

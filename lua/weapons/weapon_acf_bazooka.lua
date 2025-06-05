@@ -9,16 +9,13 @@ SWEP.PrintName              = "ACF Bazooka"
 SWEP.IconOffset				= Vector(4, -4, 0)
 SWEP.IconAngOffset			= Angle()
 
-SWEP.UseHands               = true
+SWEP.UseHands               = false
 SWEP.ViewModel              = "models/weapons/bazooka/v_bazooka.mdl"
-SWEP.ViewModelFlip          = false
 SWEP.ViewModelFOV			= 45
 
 SWEP.ShotSound				= Sound("Weapon_Bazooka.Shoot")
 SWEP.WorldModel             = "models/weapons/bazooka/w_bazooka.mdl"
 SWEP.HoldType               = "rpg"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 4
 SWEP.SlotPos                = 0
@@ -62,17 +59,12 @@ SWEP.ACFHEATRoundVolume		= 565.486
 SWEP.ACFHEATBreakupDist		= 0.07591
 SWEP.ACFHEATBreakupTime		= 9.2271920577613e-06
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
-
 SWEP.AimTable = {}
 SWEP.AimTable[1] = {IronPos = Vector(-3.83, -8, -0.4), IronAng = Angle(2.9, -0.5, 0),  PitchAdjust = -1.55, Text = "100yd"} -- 100yd
 SWEP.AimTable[2] = {IronPos = Vector(-3.79, -8, -1.9), IronAng = Angle(6.9, -0.4, 0),  PitchAdjust = -4.2, Text = "200yd"} -- 200yd
 SWEP.AimTable[3] = {IronPos = Vector(-3.77, -8, -3.64), IronAng = Angle(11.6, -0.35, 0),  PitchAdjust = -6.6, Text = "300yd"} -- 300yd
 
 SWEP.SprintAng				= Angle(-5, -10, 0) -- The angle the viewmodel turns to when the player is sprinting
-
-SWEP.UseHands				= false
 
 SWEP.AimFocused				= 0.75
 SWEP.AimUnfocused			= 5

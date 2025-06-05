@@ -8,13 +8,10 @@ SWEP.PrintName              = "ACF UMP45"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_smg_ump45.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/ump45/ump45-1.wav")
 SWEP.WorldModel             = "models/weapons/w_smg_ump45.mdl"
 SWEP.HoldType               = "smg"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 2
 SWEP.SlotPos                = 0
@@ -42,8 +39,6 @@ SWEP.ACFType                = "AP"
 SWEP.ACFMuzzleVel           = 285 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-8.91, -10, 4.1)
 SWEP.IronSightAng           = Angle(-1.5, -0.2, -2)
 

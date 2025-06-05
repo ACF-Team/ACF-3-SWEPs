@@ -11,13 +11,10 @@ SWEP.IconAngOffset			= Angle(0, 180, 0)
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/v_xm25.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")acf_base/weapons/grenadelauncher.mp3")
 SWEP.WorldModel             = "models/weapons/w_xm25.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 4
 SWEP.SlotPos                = 0
@@ -46,8 +43,6 @@ SWEP.ACFProjLen				= 3
 SWEP.Tracer                 = 1
 --SWEP.Fuze					= 0.025
 
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-3.48, 0, -0.35)
 --SWEP.IronSightAng           = Angle()
 SWEP.HasDropCalc			= true
@@ -55,8 +50,6 @@ SWEP.HasDropCalc			= true
 SWEP.Scope					= true
 SWEP.Zoom					= 4
 SWEP.Recovery				= 2.5
-
-SWEP.Reloading				= false
 
 SWEP:SetupACFBullet()
 

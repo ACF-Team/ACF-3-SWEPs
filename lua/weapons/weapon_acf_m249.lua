@@ -3,7 +3,7 @@ AddCSLuaFile()
 include("weapon_acf_base.lua")
 
 
-SWEP.Base                   = "weapon_base"
+SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF M249"
 
 SWEP.IconOffset				= Vector(0, 0, -3)
@@ -11,13 +11,10 @@ SWEP.IconAngOffset			= Angle()
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_mach_m249para.mdl"
-SWEP.ViewModelFlip          = false
 
 SWEP.ShotSound				= Sound(")weapons/m249/m249-1.wav")
 SWEP.WorldModel             = "models/weapons/w_mach_m249para.mdl"
 SWEP.HoldType               = "ar2"
-
-SWEP.Weight                 = 1
 
 SWEP.Slot                   = 0
 SWEP.SlotPos                = 0
@@ -43,8 +40,6 @@ SWEP.ACFMuzzleVel           = 900 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 1
 
 SWEP.IronToggle             = true
-SWEP.IronScale              = 0
-SWEP.NextIronToggle         = 0
 SWEP.IronSightPos           = Vector(-5.95, -4, 2.3)
 --SWEP.IronSightAng           = Angle()
 
