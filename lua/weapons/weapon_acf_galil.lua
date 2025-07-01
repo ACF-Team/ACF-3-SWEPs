@@ -37,7 +37,6 @@ SWEP.ACFMuzzleVel           = 800 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 1
 
 SWEP.IronSightPos           = Vector(-6.37, -10, 2.45)
---SWEP.IronSightAng           = Angle()
 
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 3

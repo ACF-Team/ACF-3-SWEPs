@@ -41,7 +41,6 @@ SWEP.Tracer                 = 1
 
 SWEP.IronToggle             = true
 SWEP.IronSightPos           = Vector(-5.95, -4, 2.3)
---SWEP.IronSightAng           = Angle()
 
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 5

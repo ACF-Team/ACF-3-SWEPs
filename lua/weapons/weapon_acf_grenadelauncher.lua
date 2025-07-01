@@ -44,7 +44,6 @@ SWEP.Tracer                 = 1
 --SWEP.Fuze					= 0.025
 
 SWEP.IronSightPos           = Vector(-3.48, 0, -0.35)
---SWEP.IronSightAng           = Angle()
 SWEP.HasDropCalc			= true
 
 SWEP.Scope					= true

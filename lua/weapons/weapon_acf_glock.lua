@@ -40,7 +40,6 @@ SWEP.CalcDistance			= 25
 SWEP.CalcDistance2			= 50
 
 SWEP.IronSightPos           = Vector(-5.78, 0, 2.6)
---SWEP.IronSightAng           = Angle(0, -0.2, 0)
 
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 4

@@ -40,7 +40,6 @@ SWEP.ACFMuzzleVel           = 850 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
 SWEP.IronSightPos           = Vector(-6.95, -2, 5.1)
---SWEP.IronSightAng           = Angle()
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0, 0, 1.5)

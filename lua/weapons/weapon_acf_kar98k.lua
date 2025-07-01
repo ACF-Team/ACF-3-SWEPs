@@ -41,7 +41,6 @@ SWEP.Tracer                 = 0
 
 SWEP.IdlePos				= Vector(0, -6, 0)
 SWEP.IronSightPos           = Vector(-6.67, -10, 3.8)
---SWEP.IronSightAng           = Angle(0.0, 0, 0)
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0, 0, 1.5)

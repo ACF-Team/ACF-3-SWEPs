@@ -43,7 +43,6 @@ SWEP.BulletModel			= "models/crossbow_bolt.mdl"
 SWEP.BulletScale			= 1
 
 SWEP.IronSightPos           = Vector(-8, -8, 2)
---SWEP.IronSightAng           = Angle()
 
 SWEP.Scope					= true
 SWEP.Zoom					= 6

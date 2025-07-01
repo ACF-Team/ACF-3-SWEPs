@@ -41,7 +41,6 @@ SWEP.Tracer                 = 1
 
 SWEP.IdlePos				= Vector(2, 0, -4)
 SWEP.IronSightPos           = Vector(0, 0, -2)
---SWEP.IronSightAng           = Angle(0, 0, 0)
 
 SWEP.CustomWorldModelPos	= true -- An attempt at fixing the broken worldmodel position
 SWEP.OffsetWorldModelPos	= Vector(0, 0, 1.5)
@@ -65,10 +64,13 @@ function SWEP:Reload()
 	local RoundsMissing = math.min(self.Primary.ClipSize - self:Clip1(), self:Ammo1())
 	self.Reloading = true
 	timer.Simple(self:SequenceDuration(), function()
-		if self:GetOwner():GetActiveWeapon() ~= self then self.Reloading = false return end
+		local owner = self:GetOwner()
+		if not IsValid(owner) then return end
+
+		if owner:GetActiveWeapon() ~= self then self.Reloading = false return end
 		self:SendWeaponAnim(ACT_VM_IDLE)
 		self:SetClip1(math.Clamp(self:Clip1() + self:Ammo1(), 0, self.Primary.ClipSize))
-		self:GetOwner():RemoveAmmo(RoundsMissing, self.Primary.Ammo)
+		owner:RemoveAmmo(RoundsMissing, self.Primary.Ammo)
 		self.Reloading = false
 	end)
 end

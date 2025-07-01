@@ -40,7 +40,6 @@ SWEP.ACFMuzzleVel           = 400 -- m/s of bullet leaving the barrel
 SWEP.Tracer                 = 0
 
 SWEP.IronSightPos           = Vector(-7.65, -8, 3.48)
---SWEP.IronSightAng           = Angle()
 
 -- Overrides the Spread variable used in drawing the crosshair
 -- Used pretty much just for shotguns due to spread being calculated differently
