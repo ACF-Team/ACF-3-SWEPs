@@ -771,7 +771,10 @@ if CLIENT then
 			Panel:SetSize(w, h / 2)
 			Panel:SetAlpha(0)
 			Panel.Think = function()
-				if (FrameNumber() - 1) > self.FrameCount then self.Panel = nil Panel:Remove() end
+				if not IsValid(self) or (FrameNumber() - 1) > self.FrameCount then
+					self.Panel = nil
+					Panel:Remove()
+				end
 			end
 
 			local Icon = vgui.Create("DModelPanel", Panel)
