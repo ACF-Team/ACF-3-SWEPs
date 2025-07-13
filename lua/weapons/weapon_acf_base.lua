@@ -126,7 +126,7 @@ SWEP.IconOverride			= "materials/vgui/entities/acf_logo.png"
 local FiremodeSound = Sound("Weapon_SMG1.Special2")
 
 function SWEP:SetupACFBullet()
-	local Area = math.pi * (SWEP.Caliber * 0.05) ^ 2
+	local Area = math.pi * (self.Caliber * 0.05) ^ 2
 	self.Bullet = {
 		DragCoef = Area * 0.0001 / self.ACFProjMass,
 		Caliber = self.Caliber * 0.1, -- Caliber in mm, converted to cm
@@ -352,8 +352,8 @@ function SWEP:CanPrimaryAttack()
 		if CLIENT and (CurTime() - self.LastShot) < self.Primary.Delay then return end
 	end
 
-	if (self:Clip1() <= 0) then
-		self:EmitSound( "Weapon_Pistol.Empty" )
+	if self:Clip1() <= 0 then
+		self:EmitSound("Weapon_Pistol.Empty")
 		self:Reload()
 
 		self.LastShot = CurTime()
@@ -382,6 +382,36 @@ end
 
 function SWEP:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
+
+	local Punch = self:GetPunch()
+	self:Recoil(Punch)
+
+	local Ply = self:GetOwner()
+	local AimMod = self:GetAimMod()
+
+	if SERVER then
+		local Aim = self:ResolveAim()
+		local Right = Aim:Right()
+		local Up = Aim:Up()
+
+		local Cone = math.tan(math.rad(self.Spread * AimMod))
+		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
+		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
+		local Dir = (Aim:Forward() + Spread):GetNormalized()
+		local Tracer = self.Tracer
+
+		if Tracer ~= 0 then
+			if self:Clip1() % 3 == 1 then
+				self:SetNW2Float("Tracer", Tracer)
+			else
+				self:SetNW2Float("Tracer", 0)
+			end
+		end
+
+		self:ShootBullet(Ply:GetShootPos(), Dir)
+	end
+
+	self:PostShot(1)
 end
 
 function SWEP:PostShot(NumberShots)

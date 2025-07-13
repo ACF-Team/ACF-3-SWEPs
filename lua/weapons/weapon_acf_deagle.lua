@@ -9,7 +9,7 @@ SWEP.PrintName              = "ACF Desert Eagle"
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_pist_deagle.mdl"
 
-SWEP.ShotSound				= Sound(")weapons/DEagle/deagle-1.wav")
+SWEP.ShotSound				= Sound(")weapons/deagle/deagle-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_deagle.mdl"
 SWEP.HoldType               = "pistol"
 
@@ -44,41 +44,3 @@ SWEP.Zoom					= 1.2
 SWEP.Recovery				= 3
 
 SWEP:SetupACFBullet()
-
-function SWEP:PrimaryAttack()
-	if self:Clip1() <= 0 then
-		self:EmitSound( "Weapon_Pistol.Empty" )
-		self:Reload()
-		self:SetNextPrimaryFire(CurTime() + 0.25)
-
-		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
-
-		return false
-	end
-
-	local Punch = self:GetPunch()
-	self:Recoil(Punch)
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-
-	if not self:CanPrimaryAttack() then return end
-
-	local Ply = self:GetOwner()
-	local AimMod = self:GetAimMod()
-
-	if SERVER then
-		local Aim = self:ResolveAim()
-		local Right = Aim:Right()
-		local Up = Aim:Up()
-
-		local Cone = math.tan(math.rad(self.Spread * AimMod))
-		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim:Forward() + Spread):GetNormalized()
-
-		self:ShootBullet(Ply:GetShootPos(), Dir)
-
-	end
-
-	self:PostShot(1)
-end
