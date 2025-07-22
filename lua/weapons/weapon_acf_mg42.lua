@@ -64,6 +64,8 @@ function SWEP:Reload()
 	local RoundsMissing = math.min(self.Primary.ClipSize - self:Clip1(), self:Ammo1())
 	self.Reloading = true
 	timer.Simple(self:SequenceDuration(), function()
+		if not IsValid(self) then return end
+
 		local owner = self:GetOwner()
 		if not IsValid(owner) then return end
 
