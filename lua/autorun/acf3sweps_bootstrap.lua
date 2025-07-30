@@ -206,33 +206,35 @@ if CLIENT then
         return node
     end
 
-    ORIGINAL_GMOD_POPULATEWEAPONS = ORIGINAL_GMOD_POPULATEWEAPONS or hook.GetTable().PopulateWeapons.AddWeaponContent
+    timer.Simple(0, function()
+        ORIGINAL_GMOD_POPULATEWEAPONS = ORIGINAL_GMOD_POPULATEWEAPONS or hook.GetTable().PopulateWeapons.AddWeaponContent
 
-    local BuildWeaponCategoriesName, BuildWeaponCategories = debug.getupvalue(ORIGINAL_GMOD_POPULATEWEAPONS, 1)
-    if BuildWeaponCategoriesName ~= "BuildWeaponCategories" then error("Garry's Mod moved upvalue #1, please fix (got " .. BuildWeaponCategoriesName .. ")") end
+        local BuildWeaponCategoriesName, BuildWeaponCategories = debug.getupvalue(ORIGINAL_GMOD_POPULATEWEAPONS, 1)
+        if BuildWeaponCategoriesName ~= "BuildWeaponCategories" then error("Garry's Mod moved upvalue #1, please fix (got " .. BuildWeaponCategoriesName .. ")") end
 
-    local AddCategoryName, AddCategory = debug.getupvalue(ORIGINAL_GMOD_POPULATEWEAPONS, 2)
-    if AddCategoryName ~= "AddCategory" then error("Garry's Mod moved upvalue #2, please fix (got " .. AddCategoryName .. ")") end
+        local AddCategoryName, AddCategory = debug.getupvalue(ORIGINAL_GMOD_POPULATEWEAPONS, 2)
+        if AddCategoryName ~= "AddCategory" then error("Garry's Mod moved upvalue #2, please fix (got " .. AddCategoryName .. ")") end
 
-    hook.Add("PopulateWeapons", "AddWeaponContent", function(Content, Tree)
-        local Categorised = BuildWeaponCategories()
+        hook.Add("PopulateWeapons", "AddWeaponContent", function(Content, Tree)
+            local Categorised = BuildWeaponCategories()
 
-        -- Helper
-        Tree.Categories = {}
-        Tree.pnlContent = Content
+            -- Helper
+            Tree.Categories = {}
+            Tree.pnlContent = Content
 
-        -- Loop through each category
-        for cat, _ in SortedPairs(Categorised) do
-            if cat ~= Category then
-                AddCategory(Tree, cat)
-            else
-                AddACF3Sweps(Tree, cat)
+            -- Loop through each category
+            for cat, _ in SortedPairs(Categorised) do
+                if cat ~= Category then
+                    AddCategory(Tree, cat)
+                else
+                    AddACF3Sweps(Tree, cat)
+                end
             end
-        end
 
-        -- Select the first node
-        local FirstNode = Tree:Root():GetChildNode(0)
-        if IsValid(FirstNode) then FirstNode:InternalDoClick() end
+            -- Select the first node
+            local FirstNode = Tree:Root():GetChildNode(0)
+            if IsValid(FirstNode) then FirstNode:InternalDoClick() end
+        end)
     end)
 end
 
