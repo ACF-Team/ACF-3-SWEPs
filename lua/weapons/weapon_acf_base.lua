@@ -758,6 +758,19 @@ if CLIENT then
 	local KeyAltAttack = string.upper(input.LookupBinding("+attack2", true))
 	local KeyUse = string.upper(input.LookupBinding("+use", true))
 
+	function SWEP:MeasurePenetration()
+		local PenText
+		if self.Bullet.Type == "HEAT" then
+			self.MeasuredPen = math.Round(AmmoTypes["HEAT"]:GetPenetration(self.Bullet, self.ACFHEATStandoff, ACF.SteelDensity), 1)
+			PenText = self.MeasuredPen .. "mm @ All distances"
+		else
+			self.MeasuredPen = math.Round(AmmoTypes[self.ACFType]:GetRangedPenetration(self.Bullet, self.CalcDistance), 1)
+			self.MeasuredPen2 = math.Round(AmmoTypes[self.ACFType]:GetRangedPenetration(self.Bullet, self.CalcDistance2), 1)
+			PenText = self.CalcDistance .. "m: " .. self.MeasuredPen .. "mm/" .. self.CalcDistance2 .. "m: " .. self.MeasuredPen2 .. "mm"
+		end
+		self.PenText = PenText
+	end
+
 	function SWEP:BuildWepSelectionText()
 		self.ControlText = {KeyAttack .. ": Shoot", KeyAltAttack .. ": Sights"}
 		self.DisplayText = {}
@@ -770,18 +783,8 @@ if CLIENT then
 			self.DisplayText[#self.DisplayText + 1] = "Fire rate: " .. math.floor(60 / self.Primary.Delay) .. " RPM"
 		end
 
-		local PenText
-		if self.Bullet.Type == "HEAT" then
-			self.MeasuredPen = math.Round(AmmoTypes["HEAT"]:GetPenetration(self.Bullet, self.ACFHEATStandoff, ACF.SteelDensity), 1)
-			PenText = self.MeasuredPen .. "mm @ All distances"
-		else
-			self.MeasuredPen = math.Round(AmmoTypes[self.ACFType]:GetRangedPenetration(self.Bullet, self.CalcDistance), 1)
-			self.MeasuredPen2 = math.Round(AmmoTypes[self.ACFType]:GetRangedPenetration(self.Bullet, self.CalcDistance2), 1)
-			PenText = self.CalcDistance .. "m: " .. self.MeasuredPen .. "mm/" .. self.CalcDistance2 .. "m: " .. self.MeasuredPen2 .. "mm"
-		end
-
-		self.DisplayText[#self.DisplayText + 1] = PenText
-
+		self:MeasurePenetration()
+		self.DisplayText[#self.DisplayText + 1] = self.PenText
 		self.DisplayText[#self.DisplayText + 1] = "Muzzle Velocity: " .. self.ACFMuzzleVel .. "m/s"
 	end
 
