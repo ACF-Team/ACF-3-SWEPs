@@ -100,7 +100,11 @@ function SWEP:Reload()
 		self:SetNWBool("iron", false)
 		timer.Simple(self:SequenceDuration() * 0.9, function() self.Reloading = false end)
 		self:EmitSound("Weapon_Crossbow.Reload")
-		timer.Simple(0.62, function() self:EmitSound("Weapon_Crossbow.BoltElectrify") end)
+		timer.Simple(0.62, function()
+			if not IsValid(self) then return end
+
+			self:EmitSound("Weapon_Crossbow.BoltElectrify")
+		end)
 	end
 	self.Reloading = DidReload
 end

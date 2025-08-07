@@ -64,10 +64,15 @@ function SWEP:Reload()
 	local RoundsMissing = math.min(self.Primary.ClipSize - self:Clip1(), self:Ammo1())
 	self.Reloading = true
 	timer.Simple(self:SequenceDuration(), function()
-		if self:GetOwner():GetActiveWeapon() ~= self then self.Reloading = false return end
+		if not IsValid(self) then return end
+
+		local owner = self:GetOwner()
+		if not IsValid(owner) then return end
+
+		if owner:GetActiveWeapon() ~= self then self.Reloading = false return end
 		self:SendWeaponAnim(ACT_VM_IDLE)
 		self:SetClip1(math.Clamp(self:Clip1() + self:Ammo1(), 0, self.Primary.ClipSize))
-		self:GetOwner():RemoveAmmo(RoundsMissing, self.Primary.Ammo)
+		owner:RemoveAmmo(RoundsMissing, self.Primary.Ammo)
 		self.Reloading = false
 	end)
 end
