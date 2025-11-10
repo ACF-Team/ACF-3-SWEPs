@@ -238,6 +238,13 @@ if CLIENT then
     end)
 end
 
+if SERVER then
+    hook.Add("ACF_OnLoadPersistedData", "ACF SWEPs Workshop Content", function()
+        if ACF.WorkshopContent then
+            resource.AddWorkshop("2923573966") -- ACF-3 SWEPs
+        end
+    end)
+end
 
 -- i'd joke about there being pain involved in making this, but in reality i made a script to do this for me
 do
