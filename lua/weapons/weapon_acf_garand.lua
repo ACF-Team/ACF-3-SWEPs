@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_Garand.Shoot")
 SWEP.WorldModel             = "models/weapons/garand/w_garand.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 1
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

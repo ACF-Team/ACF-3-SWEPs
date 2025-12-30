@@ -13,7 +13,7 @@ SWEP.ShotSound				= Sound(")weapons/famas/famas-1.wav")
 SWEP.WorldModel             = "models/weapons/w_rif_famas.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 0
+SWEP.Slot                   = 2
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

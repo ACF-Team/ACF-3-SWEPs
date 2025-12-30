@@ -12,7 +12,7 @@ SWEP.ShotSound				= Sound(")weapons/sg550/sg550-1.wav")
 SWEP.WorldModel             = "models/weapons/w_snip_sg550.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 0
+SWEP.Slot                   = 2
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_Bar.Shoot")
 SWEP.WorldModel             = "models/weapons/bar/w_bar.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 0
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

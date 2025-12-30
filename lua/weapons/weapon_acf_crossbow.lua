@@ -15,7 +15,7 @@ SWEP.ShotSound				= Sound("Weapon_Crossbow.Single")
 SWEP.WorldModel             = "models/weapons/w_crossbow.mdl"
 SWEP.HoldType               = "crossbow"
 
-SWEP.Slot                   = 4
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

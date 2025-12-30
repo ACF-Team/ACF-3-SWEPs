@@ -16,7 +16,7 @@ SWEP.ShotSound				= Sound(")weapons/m249/m249-1.wav")
 SWEP.WorldModel             = "models/weapons/w_mach_m249para.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 0
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

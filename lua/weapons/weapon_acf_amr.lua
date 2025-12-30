@@ -15,7 +15,7 @@ SWEP.ShotSound				= Sound(")acf_base/weapons/sniper_fire.mp3")
 SWEP.WorldModel             = "models/weapons/w_sniper.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 4
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

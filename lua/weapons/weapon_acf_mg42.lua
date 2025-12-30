@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_Mg42.Shoot")
 SWEP.WorldModel             = "models/weapons/mg42/w_mg42bd.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 0
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

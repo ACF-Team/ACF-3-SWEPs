@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_Springfield.Shoot")
 SWEP.WorldModel             = "models/weapons/springfield/w_spring.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 1
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

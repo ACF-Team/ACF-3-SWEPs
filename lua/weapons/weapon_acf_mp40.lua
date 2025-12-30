@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_Mp40.Shoot")
 SWEP.WorldModel             = "models/weapons/mp40/w_mp40.mdl"
 SWEP.HoldType               = "smg"
 
-SWEP.Slot                   = 0
+SWEP.Slot                   = 2
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

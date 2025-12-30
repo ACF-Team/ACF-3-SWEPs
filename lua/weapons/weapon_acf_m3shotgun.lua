@@ -12,7 +12,7 @@ SWEP.ShotSound				= Sound(")weapons/m3/m3-1.wav")
 SWEP.WorldModel             = "models/weapons/w_shot_m3super90.mdl"
 SWEP.HoldType               = "shotgun"
 
-SWEP.Slot                   = 1
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

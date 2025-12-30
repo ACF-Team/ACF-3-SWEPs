@@ -12,7 +12,7 @@ SWEP.ShotSound				= Sound(")weapons/scout/scout_fire-1.wav")
 SWEP.WorldModel             = "models/weapons/w_snip_scout.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 1
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

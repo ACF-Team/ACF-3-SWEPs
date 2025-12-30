@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_KarScoped.Shoot") -- why different sounds for 
 SWEP.WorldModel             = "models/weapons/k98/w_k98s.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 1
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

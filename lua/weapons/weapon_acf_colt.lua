@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_Colt.Shoot")
 SWEP.WorldModel             = "models/weapons/colt/w_colt.mdl"
 SWEP.HoldType               = "pistol"
 
-SWEP.Slot                   = 3
+SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true
