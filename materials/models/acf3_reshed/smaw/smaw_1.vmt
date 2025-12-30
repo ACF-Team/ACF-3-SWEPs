@@ -1,0 +1,20 @@
+VertexlitGeneric
+{
+	$basetexture	"models\acf3_reshed\smaw\smaw"
+	//$color2 "[0.5 0.5 0.5]"
+	$bumpmap	"models\acf3_reshed\smaw/smaw_n"
+	"$phongexponenttexture" "models\acf3_reshed\smaw\smaw_s"
+	"$envmapmask" "models\acf3_reshed\smaw\smaw_s"
+	$normalmapalphaenvmapmask 1
+	
+	"$blendtintbybasealpha" "1"
+	"$phong" "1"
+	"$phongboost" "1"
+	"$phongalbedotint" "2"
+	"$PhongFresnelRanges" "[ 2 5 4 ]"
+	"$envmap" "env_cubemap"
+	$envmapfresnel "0.01"
+	$envmaptint "[ .01 .01 .01 ]"
+
+	"$nocull" "1"
+}
