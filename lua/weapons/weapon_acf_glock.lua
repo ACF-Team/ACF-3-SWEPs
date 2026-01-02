@@ -13,7 +13,7 @@ SWEP.ShotSound				= Sound(")weapons/glock/glock18-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_glock18.mdl"
 SWEP.HoldType               = "revolver"
 
-SWEP.Slot                   = 3
+SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

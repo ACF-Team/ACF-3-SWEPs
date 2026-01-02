@@ -13,7 +13,7 @@ SWEP.ShotSound				= Sound(")weapons/usp/usp_unsil-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_usp.mdl"
 SWEP.HoldType               = "pistol"
 
-SWEP.Slot                   = 3
+SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

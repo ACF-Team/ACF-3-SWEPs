@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_Kar.Shoot")
 SWEP.WorldModel             = "models/weapons/k98/w_k98.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 1
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

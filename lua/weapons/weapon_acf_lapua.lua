@@ -13,7 +13,7 @@ SWEP.ShotSound				= Sound(")weapons/awp/awp1.wav")
 SWEP.WorldModel             = "models/weapons/w_snip_awp.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 1
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

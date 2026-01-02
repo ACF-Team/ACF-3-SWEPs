@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_Carbine.Shoot")
 SWEP.WorldModel             = "models/weapons/m1carbine/w_m1carb.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 1
+SWEP.Slot                   = 2
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

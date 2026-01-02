@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_C96.Shoot") -- wrong one, I know, but the norm
 SWEP.WorldModel             = "models/weapons/c96/w_c96.mdl"
 SWEP.HoldType               = "pistol"
 
-SWEP.Slot                   = 3
+SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

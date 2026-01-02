@@ -17,7 +17,7 @@ SWEP.ShotSound				= Sound("Weapon_30cal.Shoot")
 SWEP.WorldModel             = "models/weapons/30cal/w_30cal.mdl"
 SWEP.HoldType               = "ar2"
 
-SWEP.Slot                   = 0
+SWEP.Slot                   = 3
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true

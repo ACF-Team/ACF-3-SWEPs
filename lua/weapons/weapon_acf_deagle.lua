@@ -13,7 +13,7 @@ SWEP.ShotSound				= Sound(")weapons/deagle/deagle-1.wav")
 SWEP.WorldModel             = "models/weapons/w_pist_deagle.mdl"
 SWEP.HoldType               = "pistol"
 
-SWEP.Slot                   = 3
+SWEP.Slot                   = 1
 SWEP.SlotPos                = 0
 
 SWEP.Spawnable              = true
