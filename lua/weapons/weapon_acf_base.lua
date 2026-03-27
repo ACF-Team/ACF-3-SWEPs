@@ -43,6 +43,7 @@ SWEP.AdminOnly              = false
 SWEP.m_WeaponDeploySpeed    = 1 -- How fast the weapon's deploy animation plays, and thus the weapon is ready (higher = faster)
 SWEP.Spread                 = 1 -- The weapon's actual spread, before being modified by other means like movement and such
 SWEP.RecoilMod              = 1 -- A multiplier to the 'bump' a player gets when shooting, only affects clientside
+SWEP.CarrySpeedMul          = 1.0 -- Multiplier for player's walk/run speed when carrying this weapon
 
 SWEP.Primary.ClipSize       = 30 -- The size of the magazine in the weapon
 SWEP.Primary.DefaultClip    = 30 -- This is what will initially start in the magazine when the weapon is first spawned
@@ -471,6 +472,7 @@ function SWEP:UpdateFiremode()
 end
 
 function SWEP:Deploy()
+
 	if CLIENT then
 		self.FOV = self:GetOwner():GetFOV()
 	else
@@ -479,7 +481,7 @@ function SWEP:Deploy()
 			if self:GetOwner():IsPlayer() then Col = team.GetColor(self:GetOwner():Team()) end
 			self:SetColor(Col)
 		end
-
+	
 		-- Hopefully fixes some weird problem with weapons not "recoiling" as they should
 		self.Primary.Automatic = false
 		timer.Simple(0, function()
@@ -487,6 +489,14 @@ function SWEP:Deploy()
 				self.Primary.Automatic = self:GetNWBool("automatic", false)
 			end
 		end)
+
+		local owner = self:GetOwner()
+
+		self.NormalPlayerWalkSpeed = owner:GetWalkSpeed()
+		self.NormalPlayerRunSpeed = owner:GetRunSpeed()
+
+		owner:SetWalkSpeed( self.NormalPlayerWalkSpeed * self.CarrySpeedMul)
+		owner:SetRunSpeed( self.NormalPlayerRunSpeed * self.CarrySpeedMul * 1)
 	end
 
 	if self.HasDropCalc then self.DropCalc = self:CalcDropTable() end
