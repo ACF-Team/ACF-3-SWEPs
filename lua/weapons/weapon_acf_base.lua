@@ -492,8 +492,13 @@ function SWEP:Deploy()
 
 		local owner = self:GetOwner()
 
-		self.NormalPlayerWalkSpeed = owner:GetWalkSpeed()
-		self.NormalPlayerRunSpeed = owner:GetRunSpeed()
+		if not self.OriginalWalkSpeed then
+			self.OriginalWalkSpeed = owner:GetWalkSpeed()
+			self.OriginalRunSpeed = owner:GetRunSpeed()
+		end
+
+		self.NormalPlayerWalkSpeed = self.OriginalWalkSpeed
+		self.NormalPlayerRunSpeed = self.OriginalRunSpeed
 
 		owner:SetWalkSpeed( self.NormalPlayerWalkSpeed * self.CarrySpeedMul)
 		owner:SetRunSpeed( self.NormalPlayerRunSpeed * self.CarrySpeedMul * 1)
@@ -511,6 +516,16 @@ function SWEP:Deploy()
 	if self.Bullet.Type == "HE" or self.Bullet.Type == "HEAT" then
 		self:SetNW2Float("FillerMass", self.Bullet.FillerMass)
 	end
+
+	return true
+end
+
+function SWEP:OnRemove()
+	local owner = self:GetOwner()
+	if IsValid(owner) and owner:IsPlayer() then
+		owner:SetWalkSpeed(self.OriginalWalkSpeed or self.NormalPlayerWalkSpeed)
+		owner:SetRunSpeed(self.OriginalRunSpeed or self.NormalPlayerRunSpeed)
+	end
 end
 
 function SWEP:Holster()
@@ -519,6 +534,14 @@ function SWEP:Holster()
 
 	self:SetNWBool("iron", false)
 	self.IronScale = 0
+
+	if SERVER then
+		local owner = self:GetOwner()
+		if IsValid(owner) and owner:IsPlayer() then
+			owner:SetWalkSpeed(self.OriginalWalkSpeed or self.NormalPlayerWalkSpeed)
+			owner:SetRunSpeed(self.OriginalRunSpeed or self.NormalPlayerRunSpeed)
+		end
+	end
 
 	return true
 end

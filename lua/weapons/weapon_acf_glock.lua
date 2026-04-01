@@ -28,6 +28,7 @@ SWEP.Primary.DefaultClip    = 24
 SWEP.Primary.Ammo           = "Pistol"
 SWEP.Primary.Automatic      = true
 SWEP.Primary.Delay          = 0.06
+SWEP.CarrySpeedMul			= 1.0
 SWEP.FiremodeSetting		= 2
 
 SWEP.Caliber                = 9 -- mm diameter of bullet

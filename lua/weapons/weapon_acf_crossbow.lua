@@ -30,6 +30,7 @@ SWEP.Primary.DefaultClip    = 1
 SWEP.Primary.Ammo           = "XBowBolt"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 1.25
+SWEP.CarrySpeedMul			= 1.0
 
 SWEP.CalcDistance			= 100
 SWEP.CalcDistance2			= 300

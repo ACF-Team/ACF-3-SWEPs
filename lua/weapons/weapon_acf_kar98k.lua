@@ -32,6 +32,7 @@ SWEP.Primary.DefaultClip    = 5
 SWEP.Primary.Ammo           = "AR2"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 1.2
+SWEP.CarrySpeedMul			= 0.8
 
 SWEP.Caliber                = 7.92 -- mm diameter of bullet
 SWEP.ACFProjMass            = 0.011 -- kg of projectile
