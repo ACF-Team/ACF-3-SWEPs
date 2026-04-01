@@ -152,7 +152,7 @@ if CLIENT then
 	end
 end
 
-function SWEP:CalcView( ply, pos, ang, fov )
+function SWEP:CalcView( _, pos, ang, _ )
 	local attachment = self:GetOwner():GetViewModel():GetAttachment( self:GetOwner():GetViewModel():LookupAttachment( "1" ) )
 	ang = ang + Angle( self:GetOwner():GetViewModel():WorldToLocalAngles( attachment.Ang ).x, self:GetOwner():GetViewModel():WorldToLocalAngles( attachment.Ang ).y, self:GetOwner():GetViewModel():WorldToLocalAngles( attachment.Ang ).z )
 	return pos, ang

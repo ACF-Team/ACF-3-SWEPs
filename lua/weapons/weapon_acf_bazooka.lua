@@ -32,7 +32,7 @@ SWEP.Primary.DefaultClip    = 1
 SWEP.Primary.Ammo           = "RPG_Round"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 0.2
-
+SWEP.CarrySpeedMul			= 0.6
 SWEP.UseHybrid				= false
 
 SWEP.Caliber                = 60 -- mm diameter of bullet
