@@ -481,7 +481,7 @@ function SWEP:Deploy()
 			if self:GetOwner():IsPlayer() then Col = team.GetColor(self:GetOwner():Team()) end
 			self:SetColor(Col)
 		end
-	
+
 		-- Hopefully fixes some weird problem with weapons not "recoiling" as they should
 		self.Primary.Automatic = false
 		timer.Simple(0, function()
