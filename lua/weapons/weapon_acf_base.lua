@@ -500,8 +500,13 @@ function SWEP:Deploy()
 		self.NormalPlayerWalkSpeed = self.OriginalWalkSpeed
 		self.NormalPlayerRunSpeed = self.OriginalRunSpeed
 
-		owner:SetWalkSpeed( self.NormalPlayerWalkSpeed * self.CarrySpeedMul)
-		owner:SetRunSpeed( self.NormalPlayerRunSpeed * self.CarrySpeedMul * 1)
+		if  GetConVar("acf_sweps_speed_mult", 1):GetBool() then
+			owner:SetWalkSpeed( self.NormalPlayerWalkSpeed * self.CarrySpeedMul)
+			owner:SetRunSpeed( self.NormalPlayerRunSpeed * self.CarrySpeedMul)
+		else
+			owner:SetWalkSpeed( self.NormalPlayerWalkSpeed )
+			owner:SetRunSpeed( self.NormalPlayerRunSpeed )
+		end
 	end
 
 	if self.HasDropCalc then self.DropCalc = self:CalcDropTable() end
