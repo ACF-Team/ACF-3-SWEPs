@@ -31,6 +31,7 @@ SWEP.Primary.DefaultClip    = 100
 SWEP.Primary.Ammo           = "SMG1"
 SWEP.Primary.Automatic      = true
 SWEP.Primary.Delay          = 0.075
+SWEP.CarrySpeedMul			= 0.65
 SWEP.FiremodeSetting		= 2
 
 SWEP.Caliber                = 5.56

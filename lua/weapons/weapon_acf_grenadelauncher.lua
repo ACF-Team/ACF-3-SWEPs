@@ -31,6 +31,7 @@ SWEP.Primary.DefaultClip    = 5
 SWEP.Primary.Ammo           = "SMG1_Grenade"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 0.3
+SWEP.CarrySpeedMul			= 0.6
 
 SWEP.UseHybrid				= false
 

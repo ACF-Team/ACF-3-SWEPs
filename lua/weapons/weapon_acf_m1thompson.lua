@@ -33,6 +33,7 @@ SWEP.Primary.Ammo           = "SMG1"
 SWEP.Primary.Automatic      = true
 SWEP.Primary.Delay          = 0.085
 SWEP.FiremodeSetting		= 2
+SWEP.CarrySpeedMul			= 0.9
 
 SWEP.CalcDistance			= 25
 SWEP.CalcDistance2			= 50

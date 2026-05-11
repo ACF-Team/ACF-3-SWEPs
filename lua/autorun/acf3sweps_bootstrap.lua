@@ -380,4 +380,6 @@ do
     sound.Add({name = "Weapon_Thompson.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "thompson/thompson_worldreload.wav"})
 end
 
+CreateConVar("acf_sweps_speed_mult", "1", true, false)
+
 print("ACF-3 SWEPs ready!")

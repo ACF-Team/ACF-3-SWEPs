@@ -31,6 +31,7 @@ SWEP.Primary.DefaultClip    = 6
 SWEP.Primary.Ammo           = "357"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 0.2
+SWEP.CarrySpeedMul			= 1.0
 
 SWEP.Caliber                = 9.06 -- mm diameter of bullet
 SWEP.ACFProjMass            = 0.014 -- kg of projectile

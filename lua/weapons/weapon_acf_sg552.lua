@@ -30,6 +30,7 @@ SWEP.Primary.DefaultClip    = 30
 SWEP.Primary.Ammo           = "SMG1"
 SWEP.Primary.Automatic      = true
 SWEP.Primary.Delay          = 0.085
+SWEP.CarrySpeedMul			= 0.8
 SWEP.FiremodeSetting		= 2
 
 SWEP.CalcDistance			= 100

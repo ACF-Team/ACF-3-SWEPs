@@ -29,6 +29,7 @@ SWEP.Primary.DefaultClip    = 7
 SWEP.Primary.Ammo           = "Buckshot"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 0.9
+SWEP.CarrySpeedMul			= 0.8
 
 SWEP.CalcDistance			= 25
 SWEP.CalcDistance2			= 50

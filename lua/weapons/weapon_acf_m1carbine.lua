@@ -32,6 +32,7 @@ SWEP.Primary.DefaultClip    = 30
 SWEP.Primary.Ammo           = "SMG1"
 SWEP.Primary.Automatic      = false
 SWEP.Primary.Delay          = 0.15
+SWEP.CarrySpeedMul			= 0.8
 
 SWEP.Caliber                = 7.8 -- mm diameter of bullet
 SWEP.ACFProjMass            = 0.007 -- kg of projectile
