@@ -528,8 +528,8 @@ end
 function SWEP:OnRemove()
 	local owner = self:GetOwner()
 	if IsValid(owner) and owner:IsPlayer() then
-		owner:SetWalkSpeed(self.OriginalWalkSpeed or self.NormalPlayerWalkSpeed)
-		owner:SetRunSpeed(self.OriginalRunSpeed or self.NormalPlayerRunSpeed)
+		owner:SetWalkSpeed(self.OriginalWalkSpeed or self.NormalPlayerWalkSpeed or owner:GetWalkSpeed())
+		owner:SetRunSpeed(self.OriginalRunSpeed or self.NormalPlayerRunSpeed or owner:GetRunSpeed())
 	end
 end
 
