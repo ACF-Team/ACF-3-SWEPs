@@ -125,7 +125,7 @@ if CLIENT then
 		end
 	end
 
-	local function AddWeaponToCategory(PropPanel, Weapon)
+	local function CreateWeaponIcon(Weapon, PropPanel)
 		local WeaponIcon = spawnmenu.CreateContentIcon(Weapon.ScriptedEntityType or "weapon", PropPanel, {
 			nicename	= Weapon.PrintName or Weapon.ClassName,
 			spawnname	= Weapon.ClassName,
@@ -133,107 +133,35 @@ if CLIENT then
 			admin		= Weapon.AdminOnly
 		})
 
-		WeaponIcon.WeaponClassName = Weapon.ClassName
-		WeaponIcon:SetTooltipDelay(0)
-		WeaponIcon:SetTooltipPanelOverride("ACF3.SWEPs.ViewWeaponInfo")
-		function WeaponIcon:Paint(w, h)
-			DrawWeaponIcon(self, w, h)
-		end
-		local Think = WeaponIcon.Think
-		function WeaponIcon:Think()
-			if Think then Think(self) end
-			if IsValid(self.SpawnIcon) then
-				self.SpawnIcon:SetPos(3 + self.Border, 3 + self.Border)
-				self.SpawnIcon:SetSize(128 - 8 - self.Border * 2, 128 - 8 - self.Border * 2)
+		if Weapon.Category == Category then
+			WeaponIcon.WeaponClassName = Weapon.ClassName
+			WeaponIcon:SetTooltipDelay(0)
+			WeaponIcon:SetTooltipPanelOverride("ACF3.SWEPs.ViewWeaponInfo")
+			function WeaponIcon:Paint(w, h)
+				DrawWeaponIcon(self, w, h)
+			end
+			local Think = WeaponIcon.Think
+			function WeaponIcon:Think()
+				if Think then Think(self) end
+				if IsValid(self.SpawnIcon) then
+					self.SpawnIcon:SetPos(3 + self.Border, 3 + self.Border)
+					self.SpawnIcon:SetSize(128 - 8 - self.Border * 2, 128 - 8 - self.Border * 2)
+				end
 			end
 		end
+
 		return WeaponIcon
 	end
 
-	local function BuildWeaponCategories()
-		local weapons = list.Get("Weapon")
-		local Categorised = {}
-
-		-- Build into categories
-		for _, weapon in pairs(weapons) do
-			if not weapon.Spawnable then continue end
-
-			local Category = language.GetPhrase(weapon.Category ~= "Other" and weapon.Category or "#spawnmenu.category.other")
-			if not isstring(Category) then Category = tostring(Category) end
-
-			Categorised[Category] = Categorised[Category] or {}
-			table.insert(Categorised[Category], weapon)
-		end
-
-		return Categorised
-	end
-
-	local function AddACF3Sweps(tree, cat)
-		-- Add a node to the tree
-		local node = tree:AddNode(cat, "vgui/entities/acf_logo.png")
-		tree.Categories[cat] = node
-
-		-- When we click on the node - populate it using this function
-		node.DoPopulate = function(self)
-
-			-- If we've already populated it - forget it.
-			if IsValid(self.PropPanel) then return end
-
-			-- Create the container panel
-			self.PropPanel = vgui.Create("ContentContainer", tree.pnlContent)
-			self.PropPanel:SetVisible(false)
-			self.PropPanel:SetTriggerSpawnlistChange(false)
-
-			local weps = BuildWeaponCategories()[cat]
-			if not weps then return end -- May no longer have any weapons due to autorefresh
-
-			for _, ent in SortedPairsByMemberValue( weps, "PrintName" ) do
-				AddWeaponToCategory( self.PropPanel, ent )
-			end
-
-		end
-
-		-- If we click on the node populate it and switch to it.
-		node.DoClick = function(self)
-			self:DoPopulate()
-			tree.pnlContent:SwitchPanel(self.PropPanel)
-		end
-
-		node.OnRemove = function(self)
-			if IsValid(self.PropPanel) then self.PropPanel:Remove() end
-		end
-
-		return node
-	end
+	list.Set("ContentCategoryIcons", Category, "vgui/entities/acf_logo.png")
 
 	timer.Simple(0, function()
-		ORIGINAL_GMOD_POPULATEWEAPONS = ORIGINAL_GMOD_POPULATEWEAPONS or hook.GetTable().PopulateWeapons.AddWeaponContent
-
-		local BuildWeaponCategoriesName, BuildWeaponCategories = debug.getupvalue(ORIGINAL_GMOD_POPULATEWEAPONS, 1)
-		if BuildWeaponCategoriesName ~= "BuildWeaponCategories" then error("Garry's Mod moved upvalue #1, please fix (got " .. BuildWeaponCategoriesName .. ")") end
-
-		local AddCategoryName, AddCategory = debug.getupvalue(ORIGINAL_GMOD_POPULATEWEAPONS, 2)
-		if AddCategoryName ~= "AddCategory" then error("Garry's Mod moved upvalue #2, please fix (got " .. AddCategoryName .. ")") end
-
 		hook.Add("PopulateWeapons", "AddWeaponContent", function(Content, Tree)
-			local Categorised = BuildWeaponCategories()
-
-			-- Helper
-			Tree.Categories = {}
-			Tree.pnlContent = Content
-
-			-- Loop through each category
-			for cat, _ in SortedPairs(Categorised) do
-				if cat ~= Category then
-					AddCategory(Tree, cat)
-				else
-					AddACF3Sweps(Tree, cat)
-				end
-			end
-
-			-- Select the first node
-			local FirstNode = Tree:Root():GetChildNode(0)
-			if IsValid(FirstNode) then FirstNode:InternalDoClick() end
+			Content:PopulateFromList("Weapon", Tree, {
+				SortName = "PrintName",
+				CategoryIcon = "icon16/gun.png",
+				CreateIconFunc = CreateWeaponIcon
+			})
 		end)
 	end)
 end
