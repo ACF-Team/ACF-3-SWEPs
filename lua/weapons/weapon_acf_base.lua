@@ -3,7 +3,10 @@ AddCSLuaFile()
 -- TODO: Prone Mod support
 -- TODO: Bipods!
 
-local AmmoTypes = ACF.Classes.AmmoTypes:GetEntries()
+local function GetAmmoType(ShortName)
+	return ACF.Classes.GetTypeByName("ACF.Ammunition." .. ShortName)
+end
+
 local Damage	= ACF.Damage
 local DmgObj	= Damage.Objects
 
@@ -141,6 +144,8 @@ function SWEP:SetupACFBullet()
 		MuzzleVel = self.ACFMuzzleVel
 	}
 
+	self.Bullet.AmmoType = "ACF.Ammunition." .. self.ACFType
+
 	if self.ACFType == "APDS" then
 		self.Bullet.DragCoef = Area * 0.000125 / self.ACFProjMass
 	end
@@ -207,7 +212,7 @@ function SWEP:Initialize()
 	self:SetNW2Float("Caliber", self.Bullet.Caliber)
 	self:SetNW2Float("ProjMass", self.Bullet.ProjMass)
 	self:SetNW2Float("DragCoef", self.Bullet.DragCoef)
-	self:SetNW2Float("AmmoType", self.Bullet.Type)
+	self:SetNW2String("AmmoType", self.Bullet.AmmoType)
 
 	if self.BulletModel then self:SetNW2String("BulletModel", self.BulletModel) self:SetNW2Float("BulletScale", self.BulletScale or 1) end
 
@@ -254,7 +259,7 @@ local function ShootACFBullet(swep, Pos, Dir, Filter)
 
 	swep.Bullet.Flight = Dir * swep.ACFMuzzleVel * 39.37 + Ply:GetVelocity()
 
-	AmmoTypes[swep.ACFType]:Create(swep, swep.Bullet)
+	GetAmmoType(swep.ACFType):Create(swep, swep.Bullet)
 end
 
 function SWEP:ResolveAim()
@@ -368,7 +373,7 @@ function SWEP:CanPrimaryAttack()
 
 	-- Calls this hook to see if this gun is allowed to shoot an ACF shell
 	-- There isn't a way for the client to know about this, so we'll just replenish the clientside ammo
-	if SERVER and (hook.Run("ACF_FireShell", self) == false) then
+	if SERVER and (ACF.GunsCanFire == false or hook.Run("ACF_FireShell", self) == false) then
 		self:SetNWInt("lastammo")
 		self:CallOnClient("ResetAmmo")
 
@@ -799,11 +804,11 @@ if CLIENT then
 	function SWEP:MeasurePenetration()
 		local PenText
 		if self.Bullet.Type == "HEAT" then
-			self.MeasuredPen = math.Round(AmmoTypes["HEAT"]:GetPenetration(self.Bullet, self.ACFHEATStandoff, ACF.SteelDensity), 1)
+			self.MeasuredPen = math.Round(GetAmmoType("HEAT"):GetPenetration(self.Bullet, self.ACFHEATStandoff, ACF.SteelDensity), 1)
 			PenText = self.MeasuredPen .. "mm @ All distances"
 		else
-			self.MeasuredPen = math.Round(AmmoTypes[self.ACFType]:GetRangedPenetration(self.Bullet, self.CalcDistance), 1)
-			self.MeasuredPen2 = math.Round(AmmoTypes[self.ACFType]:GetRangedPenetration(self.Bullet, self.CalcDistance2), 1)
+			self.MeasuredPen = math.Round(GetAmmoType(self.ACFType):GetRangedPenetration(self.Bullet, self.CalcDistance), 1)
+			self.MeasuredPen2 = math.Round(GetAmmoType(self.ACFType):GetRangedPenetration(self.Bullet, self.CalcDistance2), 1)
 			PenText = self.CalcDistance .. "m: " .. self.MeasuredPen .. "mm/" .. self.CalcDistance2 .. "m: " .. self.MeasuredPen2 .. "mm"
 		end
 		self.PenText = PenText
