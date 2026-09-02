@@ -156,6 +156,9 @@ if CLIENT then
 	list.Set("ContentCategoryIcons", Category, "vgui/entities/acf_logo.png")
 
 	timer.Simple(0, function()
+		-- TODO: Remove after the update
+		if VERSION < 260901 then return end
+
 		hook.Add("PopulateWeapons", "AddWeaponContent", function(Content, Tree)
 			Content:PopulateFromList("Weapon", Tree, {
 				SortName = "PrintName",
