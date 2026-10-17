@@ -31,7 +31,7 @@ SWEP.Primary.Ammo           = "SMG1"
 SWEP.Primary.Automatic      = true
 SWEP.Primary.Delay          = 0.085
 SWEP.CarrySpeedMul			= 0.8
-SWEP.FiremodeSetting		= 2
+SWEP.FiremodeSetting		= 3
 
 SWEP.Caliber                = 5.56 -- mm diameter of bullet
 SWEP.ACFProjMass            = 0.004 -- kg of projectile

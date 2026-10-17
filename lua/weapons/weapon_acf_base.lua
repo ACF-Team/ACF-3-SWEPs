@@ -65,12 +65,15 @@ SWEP.Primary.Automatic      = true -- Whether or not the weapon can refire by it
 
 -- 1 is just normal firing (user can't change)
 -- 2 is full auto and semi auto
+-- 3 is full auto, semi auto and burst
 -- If it needs to be just semi auto, just set Automatic to false above
 SWEP.FiremodeSetting		= 1
 
 -- 1 is normal full auto
 -- 2 is semi-auto
+-- 3 is burst fire
 SWEP.CurrentFiremode		= 1
+SWEP.BurstSize				= 3 -- Rounds fired per trigger pull in burst fire
 
 SWEP.Scope                  = false -- If true, it will hide the viewmodel when aimed and draw a scope overlay
 -- Set this to the index of the scope submaterial and it will override
@@ -206,11 +209,12 @@ function SWEP:SetupACFBullet()
 end
 
 function SWEP:Initialize()
-	self.FiremodeSetting = math.Clamp(math.floor(self.FiremodeSetting), 1, 2)
-	self.CurrentFiremode = math.Clamp(math.floor(self.CurrentFiremode), 1, 2)
+	self.FiremodeSetting = math.Clamp(math.floor(self.FiremodeSetting), 1, 3)
+	self.CurrentFiremode = math.Clamp(math.floor(self.CurrentFiremode), 1, self.FiremodeSetting)
 
 	if self.FiremodeSetting ~= 1 then
-		if self.CurrentFiremode == 1 then self.Primary.Automatic = true else self.Primary.Automatic = false end
+		-- Burst fire needs the weapon to keep firing while the trigger is held, CanPrimaryAttack cuts it off after the burst
+		self.Primary.Automatic = self.CurrentFiremode ~= 2
 	end
 	self:UpdateFiremode()
 
@@ -360,6 +364,9 @@ function SWEP:CanPrimaryAttack()
 
 	if self.Primary.Automatic ~= self:GetNWBool("automatic", false) then self:UpdateFiremode() end
 
+	-- The burst is spent, wait for the trigger to be released (see SWEP:Think)
+	if self:GetNWInt("firemode", 1) == 3 and (self.BurstShots or 0) >= self.BurstSize then return false end
+
 	if self:GetOwner():IsPlayer() then
 		if SERVER and IsSinglePlayer then self:CallOnClient("PrimaryAttack") end
 
@@ -450,6 +457,8 @@ function SWEP:PostShot(NumberShots)
 	self.LastShot = CurTime()
 	if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
 
+	self.BurstShots = (self.BurstShots or 0) + 1
+
 	self:TakePrimaryAmmo(NumberShots)
 end
 
@@ -464,13 +473,11 @@ function SWEP:SecondaryAttack()
 	if Owner:KeyDown(IN_USE) and (CurTime() > self.NextAttack2Toggle) and self.FiremodeSetting ~= 1 then
 
 		if SERVER then
-			local A = self.CurrentFiremode
-			if self.FiremodeSetting == 2 then
-				if A == 1 then A = 2 else A = 1 end
-			end
+			local A = self.CurrentFiremode + 1
+			if A > self.FiremodeSetting then A = 1 end
 
 			self.CurrentFiremode = A
-			if self.CurrentFiremode == 1 then self.Primary.Automatic = true else self.Primary.Automatic = false end
+			self.Primary.Automatic = A ~= 2
 
 			self:UpdateFiremode()
 		else
@@ -600,6 +607,10 @@ function SWEP:GetNPCRestTimes()
 end
 
 function SWEP:Think()
+	-- A new burst can start once the trigger has been let go
+	local Owner = self:GetOwner()
+	if self.BurstShots and Owner:IsPlayer() and not Owner:KeyDown(IN_ATTACK) then self.BurstShots = 0 end
+
 	if SERVER then
 		local ct = CurTime()
 		if ct > (self.NextThinkTime or 0) then
@@ -953,7 +964,7 @@ if CLIENT then
 		if Disable[e] then return false else return true end
 	end
 
-	local FireModeAlias = {[1] = "A", [2] = "1"}
+	local FireModeAlias = {[1] = "A", [2] = "1", [3] = "3"}
 
 	local ScopeMat = Material("HUD/scope2.png", "nocull")
 
