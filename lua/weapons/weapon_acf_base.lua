@@ -97,6 +97,8 @@ SWEP.IronSightPos           = Vector(0, 0, 0) -- Shifts the viewmodel by this mu
 --SWEP.IronSightAng           = Angle() -- Turns the viewmodel by this much to help line the above too
 SWEP.SprintAng				= Angle(-15, 40, 0) -- The angle the viewmodel turns to when the player is sprinting
 
+SWEP.AimFireAnim			= false -- Set true to play the fire animation even while aiming down sights
+SWEP.IronTime				= 0.25 -- Seconds to fully raise or lower the sights, the viewmodel gets there a bit sooner and the zoom takes the final stretch
 SWEP.AimFocused				= 0.5 -- Multiplier to the weapon spread while aimed down sights
 SWEP.AimUnfocused			= 3 -- Same, but when not aimed
 
@@ -429,8 +431,11 @@ end
 function SWEP:PostShot(NumberShots)
 	self:EmitSound(self.ShotSound)
 
+	-- Fire animations usually pull the gun off the sights, so keep it steady while aiming (scoped weapons hide the viewmodel anyway)
+	local Aiming = (CLIENT and self:IsAiming()) or (SERVER and self:GetNWBool("iron", false))
+
 	self:SendWeaponAnim(ACT_VM_IDLE)
-	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+	if self.AimFireAnim or self.Scope or not Aiming then self:SendWeaponAnim(ACT_VM_PRIMARYATTACK) end
 
 	if CLIENT then
 		if IsFirstTimePredicted() then self:ShotEffects() end
@@ -734,16 +739,24 @@ if CLIENT then
 		self:DrawModel()
 	end
 
+	-- Same condition the server uses for "iron", read from local input so the sights respond without waiting on the network
+	function SWEP:IsAiming()
+		local Owner = self:GetOwner()
+
+		return Owner:IsOnGround() and not Owner:IsSprinting() and Owner:KeyDown(IN_ATTACK2) and not Owner:KeyDown(IN_USE)
+	end
+
 	function SWEP:TranslateFOV(FOV)
 		local Owner = self:GetOwner()
 		local SelfTbl = self:GetTable()
-		local Rate = math.Clamp(RealTime() - SelfTbl.RateTime, 0, 1)
+		local Delta = math.Clamp(RealTime() - SelfTbl.RateTime, 0, 0.1)
 
-		local InIrons = self:GetNWBool("iron", false) and not SelfTbl.Reloading and not (SelfTbl.TempOut or false)
+		local InIrons = self:IsAiming() and not SelfTbl.Reloading and not (SelfTbl.TempOut or false)
 
-		local SprintScale = SelfTbl.SprintScale * (1 - (Rate * 7)) + ((Owner:IsSprinting() and (Owner:GetAbsVelocity():LengthSqr() > 10000)) and 1 or 0) * (Rate * 7)
+		local Sprinting = Owner:IsSprinting() and (Owner:GetAbsVelocity():LengthSqr() > 10000)
+		local SprintScale = math.Approach(SelfTbl.SprintScale, Sprinting and 1 or 0, Delta * 7)
 
-		local IronScale = SelfTbl.IronScale * (1 - (Rate * 5)) + (InIrons and (1 - SprintScale) or 0) * (Rate * 5)
+		local IronScale = math.Approach(SelfTbl.IronScale, InIrons and (1 - SprintScale) or 0, Delta / SelfTbl.IronTime)
 
 		SelfTbl.RateTime = RealTime()
 		local FinalIronScale = IronScale >= 0.75 and ((IronScale - 0.75) / 0.25) or 0
@@ -756,7 +769,7 @@ if CLIENT then
 
 	function SWEP:AdjustMouseSensitivity()
 		local Sens = 1
-		local Zoomed = self:GetNWBool("iron", false) and not (self.TempOut or false)
+		local Zoomed = self:IsAiming() and not (self.TempOut or false)
 		if self.Scope and Zoomed then Sens = (1 / (self.Zoom or 1)) * self.IronScale + (1 - self.IronScale) end
 		if not Sens then Sens = 1 end
 		if Sens == 1 then return nil end -- returning nil actually just leaves the player's default sensitivity
@@ -766,7 +779,7 @@ if CLIENT then
 	function SWEP:GetViewModelPosition(Pos, Ang)
 		-- A * ( 1 - X ) + B * X
 		local Up, Right, Forward = Ang:Up(), Ang:Right(), Ang:Forward()
-		local Mul = math.min(self.IronScale / 0.75, 1)
+		local Mul = math.ease.InOutQuad(math.min(self.IronScale / 0.75, 1))
 
 		local Owner = self:GetOwner()
 		local ep = Owner:EyePos()
@@ -818,7 +831,7 @@ if CLIENT then
 
 	function SWEP:ShouldDrawViewModel()
 		if self.Scope then
-			return not (self:GetNWBool("iron", false) and (self.IronScale >= 0.75) and not (self.TempOut or false))
+			return not (self:IsAiming() and (self.IronScale >= 0.75) and not (self.TempOut or false))
 		else return true end
 	end
 
