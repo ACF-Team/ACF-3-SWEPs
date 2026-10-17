@@ -46,6 +46,12 @@ SWEP.AdminOnly              = false
 SWEP.m_WeaponDeploySpeed    = 1 -- How fast the weapon's deploy animation plays, and thus the weapon is ready (higher = faster)
 SWEP.Spread                 = 1 -- The weapon's actual spread, before being modified by other means like movement and such
 SWEP.RecoilMod              = 1 -- A multiplier to the 'bump' a player gets when shooting, only affects clientside
+SWEP.PunchAmount            = 1.5 -- Degrees of temporary view punch per shot (before RecoilMod), this springs back to the original aim point
+SWEP.KickUp                 = 1 -- Degrees the aim point permanently climbs per shot (before RecoilMod), applied smoothly
+SWEP.KickHorizontal         = 0.5 -- Max degrees the view drifts left/right per shot (before RecoilMod)
+SWEP.KickSpeed              = 15 -- How fast the pending view kick is applied (higher = snappier)
+SWEP.KickBack               = 1.5 -- Units the viewmodel is pushed back per shot (before RecoilMod)
+SWEP.KickBackSpeed          = 12 -- How fast the viewmodel returns after a shot
 SWEP.CarrySpeedMul          = 1.0 -- Multiplier for player's walk/run speed when carrying this weapon
 
 SWEP.Primary.ClipSize       = 30 -- The size of the magazine in the weapon
@@ -426,6 +432,13 @@ function SWEP:PostShot(NumberShots)
 	self:SendWeaponAnim(ACT_VM_IDLE)
 	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 
+	if CLIENT then
+		if IsFirstTimePredicted() then self:ShotEffects() end
+	elseif IsSinglePlayer then
+		-- The client never runs the shot itself in single player (it is not "first time predicted"), so hand it the effects
+		self:CallOnClient("ShotEffects")
+	end
+
 	self:GetOwner():MuzzleFlash()
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 
@@ -566,7 +579,7 @@ function SWEP:Reload()
 end
 
 function SWEP:GetPunch()
-	return Angle(-3, 0, 0) * self.RecoilMod * (self:GetNWBool("iron", false) and 0.4 or 1)
+	return Angle(-self.PunchAmount, 0, 0) * self.RecoilMod * (self:GetNWBool("iron", false) and 0.4 or 1)
 end
 
 function SWEP:GetNPCBulletSpread()
@@ -647,16 +660,8 @@ function SWEP:CalcDropTable()
 end
 
 function SWEP:Recoil(PunchAmt)
-	local IFTP = IsFirstTimePredicted()
 	local Ply = self:GetOwner()
 	if Ply:IsPlayer() and (Ply:IsSprinting() and (Ply:GetAbsVelocity():LengthSqr() > 10000)) then return false end
-	if (SP and SERVER) or (not SP and CLIENT and IFTP) then
-		local ang = Ply:EyeAngles()
-		ang.p = ang.p - self.RecoilMod * 0.5
-		ang.y = ang.y + math.Rand(-1, 1) * self.RecoilMod * 0.5
-
-		Ply:SetEyeAngles(ang)
-	end
 	Ply:ViewPunch(PunchAmt)
 end
 
@@ -676,6 +681,40 @@ if CLIENT then
 		weight		= 500,
 		extended	= true
 	})
+
+	-- Cosmetic, client only effects of a shot: queued view kick, viewmodel kick and muzzle light
+	function SWEP:ShotEffects()
+		-- Queued here, applied over the next few frames in SWEP:HandleRecoil
+		self.PendingPitch = (self.PendingPitch or 0) - self.KickUp * self.RecoilMod
+		self.PendingYaw = (self.PendingYaw or 0) + math.Rand(-1, 1) * self.KickHorizontal * self.RecoilMod
+		self.VMKick = (self.VMKick or 0) + self.KickBack * self.RecoilMod
+	end
+
+	-- Spreads the queued view kick over a few frames instead of snapping the camera
+	function SWEP:HandleRecoil()
+		local Pitch, Yaw = self.PendingPitch or 0, self.PendingYaw or 0
+		if Pitch == 0 and Yaw == 0 then return end
+
+		local Owner = self:GetOwner()
+		local Decay = math.exp(-self.KickSpeed * FrameTime())
+		local DeltaP, DeltaY = Pitch * (1 - Decay), Yaw * (1 - Decay)
+
+		if math.abs(Pitch) < 0.001 and math.abs(Yaw) < 0.001 then
+			DeltaP, DeltaY = Pitch, Yaw
+			self.PendingPitch, self.PendingYaw = 0, 0
+		else
+			self.PendingPitch, self.PendingYaw = Pitch - DeltaP, Yaw - DeltaY
+		end
+
+		local Ang = Owner:EyeAngles()
+		Ang.p = Ang.p + DeltaP
+		Ang.y = Ang.y + DeltaY
+		Owner:SetEyeAngles(Ang)
+	end
+
+	function SWEP:DrawHUDBackground()
+		self:HandleRecoil()
+	end
 
 	function SWEP:DrawWorldModel()
 		self:SetColor(White)
@@ -755,6 +794,18 @@ if CLIENT then
 			Ang:RotateAroundAxis(Right, IronAng.x * Mul)
 			Ang:RotateAroundAxis(Up, IronAng.y * Mul)
 			Ang:RotateAroundAxis(Forward, IronAng.z * Mul)
+		end
+
+		-- The engine reads these every frame, so the sights stay steady while strafing
+		local Steady = Mul * (1 - self.SprintScale)
+		self.SwayScale = Lerp(Steady, 1, 0.05)
+		self.BobScale = Lerp(Steady, 1, 0.05)
+
+		-- Push the viewmodel back on firing, easing out
+		local Kick = self.VMKick or 0
+		if Kick > 0.001 then
+			Pos = Pos - Forward * Kick * (1 - Mul * 0.5)
+			self.VMKick = Kick * math.exp(-self.KickBackSpeed * FrameTime())
 		end
 
 		local IdlePos	= (self.IdlePos and self.IdlePos or Vector())
