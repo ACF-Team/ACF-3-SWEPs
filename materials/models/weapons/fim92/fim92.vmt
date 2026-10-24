@@ -1,0 +1,15 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/weapons/fim92/fim92"
+	"$phongexponenttexture" "models/weapons/fim92/fim92"
+
+	"$selfillum" "1"
+	"$selfillummask" "models/weapons/fim92/fim92_glow"
+
+	"$bumpmap" "effects/flat_normal"
+	"$phong" "1"
+	"$phongboost" "10"
+	"$phongexponent" "20"
+	"$phongfresnelranges" "[.1 .4 1]"
+	"$basemapalphaphongmask" "1"
+}

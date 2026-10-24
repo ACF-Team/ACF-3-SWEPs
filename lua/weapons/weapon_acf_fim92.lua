@@ -10,14 +10,17 @@ SWEP.PrintName              = "ACF FIM-92 Stinger"
 SWEP.IconOffset				= Vector(4, -4, 0)
 SWEP.IconAngOffset			= Angle()
 
--- TODO: Placeholder HL2 RPG models until the Stinger gets its own
+-- Models, textures and sounds from Vanilla-Styled FIM-92 Stinger by Rocks: https://steamcommunity.com/sharedfiles/filedetails/?id=3807683332
 SWEP.UseHands               = true
-SWEP.ViewModel              = "models/weapons/c_rpg.mdl"
+SWEP.ViewModel              = "models/weapons/fim92/c_fim92.mdl"
 SWEP.ViewModelFOV			= 54
 
-SWEP.ShotSound				= Sound("Weapon_RPG.Single")
-SWEP.WorldModel             = "models/weapons/w_rocket_launcher.mdl"
+SWEP.ShotSound				= Sound("Weapon_FIM92.Shoot")
+SWEP.WorldModel             = "models/weapons/fim92/w_fim92.mdl"
 SWEP.HoldType               = "rpg"
+SWEP.CustomWorldModelPos	= true -- Its weapon_bone doesn't bonemerge onto GMod playermodels
+SWEP.OffsetWorldModelPos	= Vector(0, 0, -4)
+SWEP.OffsetWorldModelAng	= Angle(10, 0, 180)
 
 SWEP.Slot                   = 4
 SWEP.SlotPos                = 0
@@ -61,6 +64,7 @@ SWEP.SeekInterval			= 0.1
 SWEP.LockPitch				= 170 -- Pitch of the growl once locked
 
 SWEP.IronSightPos			= Vector(-2, -4, 1)
+SWEP.IdlePos				= Vector(3, 5, -1.5)
 SWEP.SprintAng				= Angle(-10, -10, 0)
 
 SWEP.AimFocused				= 0.5
