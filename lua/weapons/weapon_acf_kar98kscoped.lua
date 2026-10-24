@@ -57,66 +57,8 @@ SWEP.Handling				= 1
 
 SWEP.AimFocused				= 0.05
 
+SWEP.ScopeBlinkOnFire		= true
+SWEP.ReloadType				= "rounds"
+SWEP.ReloadFinishOffset		= 0.4
+
 SWEP:SetupACFBullet()
-
-function SWEP:Reload() -- Since this weapon actually loads individual rounds but does it all in one animation,   we're gonna cut it to how many we are actually loading
-	if self:GetSequenceActivity(self:GetSequence()) == ACT_VM_RELOAD then return end
-	if self:Clip1() == self.Primary.ClipSize then return end
-	if self:Ammo1() == 0 then return false end
-	self:SetNWBool("iron", false)
-	self:SendWeaponAnim(ACT_VM_RELOAD)
-	local RoundsMissing = math.min(self.Primary.ClipSize - self:Clip1(), self:Ammo1())
-	self.Reloading = true
-	timer.Simple((((self:SequenceDuration() - 1) / 6) * RoundsMissing) + 0.4, function()
-		if not IsValid(self) then return end
-
-		local owner = self:GetOwner()
-		if not IsValid(owner) then return end
-
-		if owner:GetActiveWeapon() ~= self then self.Reloading = false return end
-		self:SendWeaponAnim(ACT_VM_IDLE)
-		self:SetClip1(math.Clamp(self:Clip1() + self:Ammo1(), 0, self.Primary.ClipSize))
-		owner:RemoveAmmo(RoundsMissing, self.Primary.Ammo)
-		self.Reloading = false
-	end)
-end
-
-function SWEP:PrimaryAttack()
-	if self:Clip1() <= 0 then
-		self:EmitSound( "Weapon_Pistol.Empty" )
-		self:Reload()
-		self:SetNextPrimaryFire(CurTime() + 0.25)
-
-		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
-
-		return false
-	end
-
-	local Punch = self:GetPunch()
-	self:Recoil(Punch)
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-
-	if not self:CanPrimaryAttack() then return end
-
-	local Ply = self:GetOwner()
-	local AimMod = self:GetAimMod()
-
-	if SERVER then
-		local Aim = self:ResolveAim()
-		local Right = Aim:Right()
-		local Up = Aim:Up()
-
-		local Cone = math.tan(math.rad(self.Spread * AimMod))
-		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim:Forward() + Spread):GetNormalized()
-
-		self:ShootBullet(Ply:GetShootPos(), Dir)
-	else
-		self.TempOut = true
-		timer.Simple(self.Primary.Delay * 0.8, function() if IsValid(self) then self.TempOut = false end end)
-	end
-
-	self:PostShot(1)
-end

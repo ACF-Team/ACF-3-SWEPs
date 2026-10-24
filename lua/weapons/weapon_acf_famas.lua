@@ -43,46 +43,6 @@ SWEP.IronSightAng           = Angle(-0.25, 0.25, -2)
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 4
 
+SWEP.FireAnimTime			= 0.01
+
 SWEP:SetupACFBullet()
-
-function SWEP:PrimaryAttack()
-	if self:Clip1() <= 0 then
-		self:EmitSound( "Weapon_Pistol.Empty" )
-		self:Reload()
-		self:SetNextPrimaryFire(CurTime() + 0.25)
-
-		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
-
-		return false
-	end
-
-	local Punch = self:GetPunch()
-	self:Recoil(Punch)
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-
-	if not self:CanPrimaryAttack() then return end
-
-	local Ply = self:GetOwner()
-	local AimMod = self:GetAimMod()
-
-	if SERVER then
-		local Aim = self:ResolveAim()
-		local Right = Aim:Right()
-		local Up = Aim:Up()
-
-		local Cone = math.tan(math.rad(self.Spread * AimMod))
-		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim:Forward() + Spread):GetNormalized()
-
-		if self:Clip1() % 3 == 1 then self:SetNW2Float("Tracer", self.Tracer) else self:SetNW2Float("Tracer", 0) end
-
-		self:ShootBullet(Ply:GetShootPos(), Dir)
-
-	end
-
-	self:PostShot(1)
-
-	timer.Simple(0.01, function() if IsValid(self) and IsValid(Ply) and (Ply:GetActiveWeapon() == self) and self:Clip1() > 0 then self:SendWeaponAnim(ACT_VM_IDLE) end end)
-end

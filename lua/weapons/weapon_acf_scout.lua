@@ -48,32 +48,6 @@ SWEP.AimFocused				= 0.01
 SWEP.AimUnfocused			= 3
 SWEP.Recovery				= 0.4
 
+SWEP.ScopeBlinkOnFire		= true
+
 SWEP:SetupACFBullet()
-
-function SWEP:PrimaryAttack()
-	if not self:CanPrimaryAttack() then return end
-
-	local Punch = self:GetPunch()
-	self:Recoil(Punch)
-
-	local Ply = self:GetOwner()
-	local AimMod = self:GetAimMod()
-
-	if SERVER then
-		local Aim = self:ResolveAim()
-		local Right = Aim:Right()
-		local Up = Aim:Up()
-
-		local Cone = math.tan(math.rad(self.Spread * AimMod))
-		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim:Forward() + Spread):GetNormalized()
-
-		self:ShootBullet(Ply:GetShootPos(), Dir)
-	else
-		self.TempOut = true
-		timer.Simple(self.Primary.Delay * 0.8, function() if IsValid(self) then self.TempOut = false end end)
-	end
-
-	self:PostShot(1)
-end

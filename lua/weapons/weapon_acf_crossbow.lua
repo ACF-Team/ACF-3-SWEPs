@@ -53,57 +53,14 @@ SWEP.Recovery				= 0.5
 SWEP.AimFocused				= 0.01
 SWEP.AimUnfocused			= 2
 
+SWEP.ReloadType				= "animation" -- Not "magazine", the bolt sound needs SWEP:Think during the reload
+SWEP.ReloadSounds			= {
+	{Time = 0, Sound = "Weapon_Crossbow.Reload"},
+	{Time = 0.62, Sound = "Weapon_Crossbow.BoltElectrify"},
+}
+
 SWEP:SetupACFBullet()
 
-function SWEP:PrimaryAttack()
-	if self:Clip1() <= 0 then
-		self:EmitSound( "Weapon_Pistol.Empty" )
-		self:Reload()
-		self:SetNextPrimaryFire(CurTime() + 0.25)
-
-		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
-
-		return false
-	end
-
-	local Punch = self:GetPunch()
-	self:Recoil(Punch)
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-
-	if not self:CanPrimaryAttack() then return end
-
-	local Ply = self:GetOwner()
-	local AimMod = self:GetAimMod()
-
-	if SERVER then
-		local Aim = self:ResolveAim()
-		local Right = Aim:Right()
-		local Up = Aim:Up()
-
-		local Cone = math.tan(math.rad(self.Spread * AimMod))
-		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim:Forward() + Spread):GetNormalized()
-
-		self:ShootBullet(Ply:GetShootPos(), Dir)
-	end
-
-	self:PostShot(1)
+function SWEP:OnShotFired()
 	self:EmitSound("Weapon_Crossbow.BoltFly")
-end
-
-function SWEP:Reload()
-	local DidReload = self:DefaultReload( ACT_VM_RELOAD ) -- If this is successful, SWEP:Think doesn't run, so we have to handle anything that should happen in there
-	if DidReload and not self.Reloading then
-		self:SetNWBool("iron", false)
-		timer.Simple(self:SequenceDuration() * 0.9, function() if IsValid(self) then self.Reloading = false end end)
-		self:EmitSound("Weapon_Crossbow.Reload")
-		timer.Simple(0.62, function()
-			if not IsValid(self) then return end
-
-			self:EmitSound("Weapon_Crossbow.BoltElectrify")
-		end)
-	end
-	self.Reloading = DidReload
 end

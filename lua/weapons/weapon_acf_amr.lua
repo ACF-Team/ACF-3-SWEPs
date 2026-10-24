@@ -53,53 +53,6 @@ SWEP.Recovery				= 0.2
 SWEP.AimFocused				= 0.1
 SWEP.AimUnfocused			= 3
 
+SWEP.ReloadSounds			= {{Time = 0, Sound = "acf_base/weapons/sniper_reload.mp3"}}
+
 SWEP:SetupACFBullet()
-
-local Reload = Sound("acf_base/weapons/sniper_reload.mp3")
-
-function SWEP:PrimaryAttack()
-	if self:Clip1() <= 0 then
-		self:EmitSound( "Weapon_Pistol.Empty" )
-		self:Reload()
-		self:SetNextPrimaryFire(CurTime() + 0.25)
-
-		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
-
-		return false
-	end
-
-	local Punch = self:GetPunch()
-	self:Recoil(Punch)
-	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-
-	if not self:CanPrimaryAttack() then return end
-
-	local Ply = self:GetOwner()
-	local AimMod = self:GetAimMod()
-
-	if SERVER then
-		local Aim = self:ResolveAim()
-		local Right = Aim:Right()
-		local Up = Aim:Up()
-
-		local Cone = math.tan(math.rad(self.Spread * AimMod))
-		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim:Forward() + Spread):GetNormalized()
-
-		self:ShootBullet(Ply:GetShootPos(), Dir)
-
-	end
-
-	self:PostShot(1)
-end
-
-function SWEP:Reload()
-	self:SetNWBool("iron", false)
-
-	if self:Ammo1() > 0 and self:Clip1() < self:GetMaxClip1() then
-		self:DefaultReload(ACT_VM_RELOAD)
-		self:EmitSound(Reload)
-	end
-end

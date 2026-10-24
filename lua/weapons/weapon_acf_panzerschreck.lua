@@ -84,33 +84,6 @@ SWEP.MoveBloom				= 2
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 0.5
 
+SWEP.RequiresAim			= true
+
 SWEP:SetupACFBullet()
-
-function SWEP:PrimaryAttack()
-	if not self:CanPrimaryAttack() then return end
-	if self:GetNWBool("iron", false) == false and self:GetOwner():IsPlayer() then
-		self:GetOwner():PrintMessage(4, "You have to aim first!")
-		return
-	end
-	local Ply = self:GetOwner()
-
-	local AimMod = self:GetAimMod()
-	local Punch = self:GetPunch()
-
-	if SERVER then
-		local Aim = self:ResolveAim()
-		local Right = Aim:Right()
-		local Up = Aim:Up()
-
-		local Cone = math.tan(math.rad(self.Spread * AimMod))
-		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim:Forward() + Spread):GetNormalized()
-
-		self:ShootBullet(Ply:GetShootPos(), (Dir:Angle() + Angle(self.PitchAdjust, 0, 0)):Forward())
-
-		self:Recoil(Punch)
-	end
-
-	self:PostShot(1)
-end

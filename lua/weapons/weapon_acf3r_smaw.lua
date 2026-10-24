@@ -81,77 +81,11 @@ SWEP.MoveBloom				= 1.5 -- Slightly less bloom, weapon is balanced
 SWEP.Zoom					= 1.5 -- SMAW has better optics
 SWEP.Recovery				= 0.3 -- Faster recovery due to recoilless design
 
+SWEP.RequiresAim			= true
+SWEP.AimHoldType			= "rpg"
+SWEP.PunchAmount			= 0.225 -- Recoilless rifle: drastically reduced recoil
+
 SWEP:SetupACFBullet()
-
-function SWEP:Think()
-	if self.BaseClass.Think then
-		self.BaseClass.Think(self)
-	end
-
-	-- Switch holdtype based on aiming state
-	local isAiming = self:GetNWBool("iron", false)
-	if isAiming and self:GetHoldType() ~= "rpg" then
-		self:SetHoldType("rpg")
-	elseif not isAiming and self:GetHoldType() ~= "passive" then
-		self:SetHoldType("passive")
-	end
-end
-
-function SWEP:PrimaryAttack()
-	if not self:CanPrimaryAttack() then return end
-	if self:GetNWBool("iron", false) == false and self:GetOwner():IsPlayer() then
-		self:GetOwner():PrintMessage(4, "You have to aim first!")
-		return
-	end
-	local Ply = self:GetOwner()
-
-	local AimMod = self:GetAimMod()
-	local Punch = self:GetPunch()
-
-	if SERVER then
-		local Aim = self:ResolveAim()
-		local Right = Aim:Right()
-		local Up = Aim:Up()
-
-		local Cone = math.tan(math.rad(self.Spread * AimMod))
-		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim:Forward() + Spread):GetNormalized()
-
-		self:ShootBullet(Ply:GetShootPos(), (Dir:Angle() + Angle(self.AimTable[self:GetNW2Int("aimsetting", 1)].PitchAdjust, 0, 0)):Forward())
-
-		self:Recoil(Punch * 0.15) -- Recoilless rifle: drastically reduced recoil
-	end
-
-	self:PostShot(1)
-end
-
-local FiremodeSound = Sound("Weapon_SMG1.Special2")
-function SWEP:SecondaryAttack()
-	local Owner = self:GetOwner()
-	if Owner:KeyDown(IN_USE) and (CurTime() > self.NextAttack2Toggle) then
-
-		if SERVER then
-			local cursetting = self:GetNW2Int("aimsetting", 1)
-			if (cursetting + 1) > #self.AimTable then cursetting = 1 else cursetting = cursetting + 1 end
-			self:SetNW2Int("aimsetting", cursetting)
-			self:GetOwner():PrintMessage(4, "Range: " .. self.AimTable[cursetting].Text)
-		else
-			self:EmitSound(FiremodeSound)
-		end
-
-		self.NextAttack2Toggle = CurTime() + 0.25
-		return true
-	end
-
-	return true
-end
-
-if CLIENT then
-	function SWEP:GetViewAim()
-		return self.AimTable[self:GetNW2Int("aimsetting", 1)]
-	end
-end
 
 function SWEP:CalcView( _, pos, ang, _ )
 	local ViewModel = self:GetOwner():GetViewModel()

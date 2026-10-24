@@ -22,8 +22,6 @@ SWEP.m_WeaponDeploySpeed    = 1.1
 SWEP.Spread                 = 2.5
 SWEP.RecoilMod              = 2
 
-SWEP.NextShell              = 0
-
 SWEP.Primary.ClipSize       = 7
 SWEP.Primary.DefaultClip    = 7
 SWEP.Primary.Ammo           = "Buckshot"
@@ -49,74 +47,21 @@ SWEP.CrosshairScale			= 0.75
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 5
 
+SWEP.ReloadType				= "shell"
+SWEP.Pellets				= 24
+SWEP.PatternSpread			= 0.75 -- Degrees the whole pattern wanders by (before aim modifiers), Spread is the spread of the pellets in it
+
 SWEP:SetupACFBullet()
 
-function SWEP:FinishReload()
-	self:SendWeaponAnim(ACT_VM_IDLE)
-	self.Reloading = false
-	self:SetNextPrimaryFire(CurTime() + self:SequenceDuration())
-end
+function SWEP:GetShotDirections()
+	local Aim = self:ResolveAim()
+	local Right, Up = Aim:Right(), Aim:Up()
+	local Center = self:SpreadDirection(Aim:Forward(), Right, Up, self.PatternSpread * self:GetAimMod())
 
-function SWEP:DoReload()
-	if self:Clip1() < self:GetMaxClip1() and self:Ammo1() > 0 and self.Reloading == true then
-		if CurTime() < self.NextShell then return end
-		self:SendWeaponAnim(ACT_VM_RELOAD)
-
-		self:SetNextPrimaryFire(CurTime() + self:SequenceDuration())
-		timer.Simple(self:SequenceDuration(), function()
-			if not IsValid(self) or not self.Reloading then return end
-
-			local Owner = self:GetOwner()
-			if not IsValid(Owner) then self.Reloading = false return end
-
-			self:SetClip1(self:Clip1() + 1)
-			Owner:RemoveAmmo(1, self.Primary.Ammo)
-			self:DoReload()
-		end)
-
-		self.NextShell = (CurTime() + self:SequenceDuration())
-	else
-		self:FinishReload()
-	end
-end
-
-function SWEP:Reload()
-	self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
-	self.Reloading = true
-	self:DoReload()
-end
-
-function SWEP:PrimaryAttack()
-	if self.Reloading and self:Clip1() > 0 then self:FinishReload() return end
-
-	if not self:CanPrimaryAttack() then return end
-
-	local Punch = self:GetPunch()
-	self:Recoil(Punch)
-
-	local Ply = self:GetOwner()
-	local AimMod = self:GetAimMod()
-
-	if SERVER then
-		local Aim = self:ResolveAim()
-		local Right = Aim:Right()
-		local Up = Aim:Up()
-
-		local Cone = math.tan(math.rad(0.75 * AimMod))
-		local randUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-		local Spread = randUnitSquare:GetNormalized() * Cone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-		local Dir = (Aim:Forward() + Spread):GetNormalized()
-
-		for _ = 1, 24 do
-			local BCone = math.tan(math.rad(self.Spread))
-			local BrandUnitSquare = (Up * (2 * math.random() - 1) + Right * (2 * math.random() - 1))
-			local BSpread = BrandUnitSquare:GetNormalized() * BCone * (math.random() ^ (1 / ACF.GunInaccuracyBias))
-			local AimSpread = (Dir + BSpread):GetNormalized()
-
-			self:ShootBullet(Ply:GetShootPos(), AimSpread)
-		end
-
+	local Directions = {}
+	for I = 1, self.Pellets do
+		Directions[I] = self:SpreadDirection(Center, Right, Up, self.Spread)
 	end
 
-	self:PostShot(1)
+	return Directions
 end
