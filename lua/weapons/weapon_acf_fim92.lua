@@ -69,7 +69,8 @@ SWEP.SeekInterval			= 0.1
 SWEP.LockPitch				= 170 -- Pitch of the growl once locked
 SWEP.NoLockSound			= Sound("buttons/button10.wav") -- Pulling the trigger without a lock
 
-SWEP.IronSightPos			= Vector(-1, -12, -0.5)
+SWEP.IronSightPos			= Vector(-0.6, -11, -1.2)
+SWEP.IronSightAng			= Angle(0, 0, -30)
 SWEP.IdlePos				= Vector(3, 5, -1.5)
 SWEP.SprintAng				= Angle(-10, -10, 0)
 

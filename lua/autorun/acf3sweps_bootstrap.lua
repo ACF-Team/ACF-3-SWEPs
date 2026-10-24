@@ -47,6 +47,25 @@ if CLIENT then
 			Text:SetFont("ACF_Label")
 			Text:DockMargin(4, 4, 0, -8)
 		end
+
+		for I, V in ipairs(self.SWEP.ControlText) do
+			local Text = self:Add("DLabel")
+			Text:Dock(TOP)
+			Text:SetText(V)
+			Text:SetDark(true)
+			Text:SetFont("ACF_Label")
+			Text:DockMargin(4, I == 1 and 12 or 4, 0, -8)
+		end
+
+		-- Grow to fit everything, the controls don't fit in the spawnicon's height
+		self:InvalidateLayout(true)
+
+		local Bottom = 0
+		for _, Child in ipairs(self:GetChildren()) do
+			if Child:IsVisible() then Bottom = math.max(Bottom, Child:GetY() + Child:GetTall()) end
+		end
+
+		self:SetTall(math.max(self:GetTall(), Bottom + 8))
 	end
 	function PANEL:Close()
 		self:Remove()
