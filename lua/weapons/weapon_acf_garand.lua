@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Garand"
 
@@ -49,8 +46,6 @@ SWEP.OffsetWorldModelAng	= Angle(10, 0, 180)
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 3
 SWEP.Handling				= 1.5
-
-SWEP:SetupACFBullet()
 
 local Ping = Sound("Weapon_Garand.ClipDing")
 

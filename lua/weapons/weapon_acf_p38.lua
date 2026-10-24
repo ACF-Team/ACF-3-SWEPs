@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF P38"
 
@@ -54,5 +51,3 @@ SWEP.OffsetWorldModelAng	= Angle(10, 0, 180)
 
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 3
-
-SWEP:SetupACFBullet()

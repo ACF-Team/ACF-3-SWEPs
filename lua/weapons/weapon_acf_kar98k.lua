@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Kar98k"
 
@@ -52,5 +49,3 @@ SWEP.Recovery				= 1
 SWEP.Handling				= 1
 
 SWEP.AimFocused				= 0.25
-
-SWEP:SetupACFBullet()

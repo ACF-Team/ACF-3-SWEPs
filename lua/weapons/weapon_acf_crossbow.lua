@@ -1,7 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Rebar Crossbow"
 
@@ -58,8 +56,6 @@ SWEP.ReloadSounds			= {
 	{Time = 0, Sound = "Weapon_Crossbow.Reload"},
 	{Time = 0.62, Sound = "Weapon_Crossbow.BoltElectrify"},
 }
-
-SWEP:SetupACFBullet()
 
 function SWEP:OnShotFired()
 	self:EmitPredictedSound("Weapon_Crossbow.BoltFly")

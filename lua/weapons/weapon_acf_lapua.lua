@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Lapua"
 
@@ -50,5 +47,3 @@ SWEP.AimUnfocused			= 3
 SWEP.Recovery				= 0.25
 
 SWEP.ScopeBlinkOnFire		= true
-
-SWEP:SetupACFBullet()

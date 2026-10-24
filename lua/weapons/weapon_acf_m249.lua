@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF M249"
 
@@ -50,5 +47,3 @@ SWEP.AimFocused				= 1.2
 SWEP.AimUnfocused			= 10
 
 SWEP.TracerEvery			= 4
-
-SWEP:SetupACFBullet()

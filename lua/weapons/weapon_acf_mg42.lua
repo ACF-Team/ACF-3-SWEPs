@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF MG42"
 
@@ -55,5 +52,3 @@ SWEP.AimFocused				= 1.2
 SWEP.AimUnfocused			= 10
 
 SWEP.ReloadType				= "animation"
-
-SWEP:SetupACFBullet()

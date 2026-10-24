@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Panzerschreck"
 
@@ -37,28 +34,11 @@ SWEP.CarrySpeedMul			= 0.6
 SWEP.UseHybrid				= false
 
 SWEP.Caliber                = 88 -- mm diameter of bullet
-SWEP.ACFProjMass            = 3.1546 -- kg of projectile
-SWEP.FillerMass				= 1.2552
-
--- I hate how inaccessible this is
-SWEP.ACFHEATDetAngle		= 75
-SWEP.ACFHEATStandoff		= 0.006637
-SWEP.ACFHEATLinerMass		= 0.283327
-SWEP.ACFHEATPropMass		= 0.127116
-SWEP.ACFHEATCartMass		= 3.281269
-SWEP.ACFHEATCasingMass		= 1.615655
--- I mean what the actual fuck, why can't I just call a single function to build this fucking data
-SWEP.ACFHEATJetMass			= 0.135737
-SWEP.ACFHEATJetMinVel		= 4396.25
-SWEP.ACFHEATJetMaxVel		= 8886.93
-SWEP.ACFHEATBoomFillerMass	= 0.5564587
-SWEP.ACFHEATRoundVolume		= 1783.8867
-SWEP.ACFHEATBreakupDist		= 0.113564
-SWEP.ACFHEATBreakupTime		= 1.2778834602665e-05
 
 SWEP.ACFType                = "HEAT"
 SWEP.ACFMuzzleVel           = 110 -- m/s of bullet leaving the barrel
-SWEP.ACFProjLen				= 13.1
+SWEP.ACFProjLen				= 27.1
+SWEP.ACFPropMass			= 0.127116 -- kg of propellant
 SWEP.Tracer                 = 0
 
 SWEP.IronSightPos           = Vector(-7.4, 0, 5.45)
@@ -85,5 +65,3 @@ SWEP.Zoom					= 1.2
 SWEP.Recovery				= 0.5
 
 SWEP.RequiresAim			= true
-
-SWEP:SetupACFBullet()

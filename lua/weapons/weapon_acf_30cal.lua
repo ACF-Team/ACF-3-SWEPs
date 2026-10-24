@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF M1919"
 
@@ -56,5 +53,3 @@ SWEP.AimUnfocused			= 10
 
 SWEP.ReloadType				= "animation"
 SWEP.ReloadAct				= ACT_VM_RELOAD_DEPLOYED
-
-SWEP:SetupACFBullet()

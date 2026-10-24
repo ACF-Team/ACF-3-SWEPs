@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Revolver"
 
@@ -47,5 +44,3 @@ SWEP.Zoom					= 1.3
 SWEP.AimFocused				= 0.1
 SWEP.AimUnfocused			= 2
 SWEP.Recovery				= 2.5
-
-SWEP:SetupACFBullet()

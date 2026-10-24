@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF MP40"
 
@@ -54,5 +51,3 @@ SWEP.Recovery				= 3
 SWEP.Handling				= 1.5
 
 SWEP.FireAnimTime			= 0.5
-
-SWEP:SetupACFBullet()

@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Bazooka"
 
@@ -36,28 +33,11 @@ SWEP.CarrySpeedMul			= 0.6
 SWEP.UseHybrid				= false
 
 SWEP.Caliber                = 60 -- mm diameter of bullet
-SWEP.ACFProjMass            = 1.17666 -- kg of projectile
-SWEP.FillerMass				= 0.3831
 SWEP.ACFType                = "HEAT"
 SWEP.ACFMuzzleVel           = 80 -- m/s of bullet leaving the barrel
 SWEP.ACFProjLen				= 18.5
+SWEP.ACFPropMass			= 0.040291 -- kg of propellant
 SWEP.Tracer                 = 0
-
--- I hate how inaccessible this is
-SWEP.ACFHEATDetAngle		= 75
-SWEP.ACFHEATStandoff		= 0.004511
-SWEP.ACFHEATLinerMass		= 0.094189
-SWEP.ACFHEATPropMass		= 0.040291
-SWEP.ACFHEATCartMass		= 1.21695
-SWEP.ACFHEATCasingMass		= 0.699373
--- I mean what the actual fuck,  why can't I just call a single function to build this fucking data
-SWEP.ACFHEATJetMass			= 0.046411
-SWEP.ACFHEATJetMinVel		= 4148.51
-SWEP.ACFHEATJetMaxVel		= 8227.45
-SWEP.ACFHEATBoomFillerMass	= 0.16984
-SWEP.ACFHEATRoundVolume		= 565.486
-SWEP.ACFHEATBreakupDist		= 0.07591
-SWEP.ACFHEATBreakupTime		= 9.2271920577613e-06
 
 SWEP.AimTable = {}
 SWEP.AimTable[1] = {IronPos = Vector(-3.83, -8, -0.4), IronAng = Angle(2.9, -0.5, 0),  PitchAdjust = -1.55, Text = "100yd"} -- 100yd
@@ -86,5 +66,3 @@ SWEP.Zoom					= 1.2
 SWEP.Recovery				= 0.5
 
 SWEP.RequiresAim			= true
-
-SWEP:SetupACFBullet()

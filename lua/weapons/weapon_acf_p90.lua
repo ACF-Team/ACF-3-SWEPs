@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF P90"
 
@@ -47,5 +44,3 @@ SWEP.Scope					= true -- Because the P90 doesn't have a proper scope or anything
 SWEP.ScopeTextureOverride	= 1
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 4
-
-SWEP:SetupACFBullet()

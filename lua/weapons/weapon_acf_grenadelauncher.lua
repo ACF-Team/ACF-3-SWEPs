@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF XM25"
 
@@ -50,5 +47,3 @@ SWEP.HasDropCalc			= true
 SWEP.Scope					= true
 SWEP.Zoom					= 4
 SWEP.Recovery				= 2.5
-
-SWEP:SetupACFBullet()

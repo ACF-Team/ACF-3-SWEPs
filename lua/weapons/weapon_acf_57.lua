@@ -1,7 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Five-SeveN"
 
@@ -42,5 +40,3 @@ SWEP.IronSightPos           = Vector(-5.95, 0, 2.75)
 
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 4
-
-SWEP:SetupACFBullet()

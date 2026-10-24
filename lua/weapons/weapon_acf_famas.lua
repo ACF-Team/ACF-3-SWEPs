@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Famas"
 
@@ -44,5 +41,3 @@ SWEP.Zoom					= 1.2
 SWEP.Recovery				= 4
 
 SWEP.FireAnimTime			= 0.01
-
-SWEP:SetupACFBullet()

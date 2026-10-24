@@ -1,7 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Shotgun"
 
@@ -50,8 +48,6 @@ SWEP.Recovery				= 5
 SWEP.ReloadType				= "shell"
 SWEP.Pellets				= 24
 SWEP.PatternSpread			= 0.75 -- Degrees the whole pattern wanders by (before aim modifiers), Spread is the spread of the pellets in it
-
-SWEP:SetupACFBullet()
 
 function SWEP:GetShotDirections()
 	local Aim = self:ResolveAim()

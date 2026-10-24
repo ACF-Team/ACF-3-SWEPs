@@ -1,7 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Scout"
 
@@ -49,5 +47,3 @@ SWEP.AimUnfocused			= 3
 SWEP.Recovery				= 0.4
 
 SWEP.ScopeBlinkOnFire		= true
-
-SWEP:SetupACFBullet()

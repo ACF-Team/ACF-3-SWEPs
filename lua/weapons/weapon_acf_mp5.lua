@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF MP5"
 
@@ -45,5 +42,3 @@ SWEP.IronSightAng           = Angle(1, 0, 0)
 
 SWEP.Zoom					= 1.2
 SWEP.Recovery				= 3.5
-
-SWEP:SetupACFBullet()

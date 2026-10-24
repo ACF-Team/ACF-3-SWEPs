@@ -1,7 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF SG550 Commando"
 
@@ -48,5 +46,3 @@ SWEP.HasDropCalc			= true
 SWEP.AimFocused				= 0.01
 SWEP.AimUnfocused			= 4
 SWEP.Recovery				= 0.9
-
-SWEP:SetupACFBullet()

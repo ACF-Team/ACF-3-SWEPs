@@ -1,7 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Anti-Material Rifle"
 
@@ -54,5 +52,3 @@ SWEP.AimFocused				= 0.1
 SWEP.AimUnfocused			= 3
 
 SWEP.ReloadSounds			= {{Time = 0, Sound = "acf_base/weapons/sniper_reload.mp3"}}
-
-SWEP:SetupACFBullet()

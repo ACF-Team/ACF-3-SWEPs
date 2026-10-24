@@ -1,8 +1,5 @@
 AddCSLuaFile()
 
-include("weapon_acf_base.lua")
-
-
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF M1903 Springfield"
 
@@ -60,5 +57,3 @@ SWEP.AimFocused				= 0.05
 SWEP.ScopeBlinkOnFire		= true
 SWEP.ReloadType				= "rounds"
 SWEP.ReloadFinishOffset		= 0.6
-
-SWEP:SetupACFBullet()
