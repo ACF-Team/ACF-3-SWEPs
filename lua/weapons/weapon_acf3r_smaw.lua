@@ -154,8 +154,13 @@ if CLIENT then
 end
 
 function SWEP:CalcView( _, pos, ang, _ )
-	local attachment = self:GetOwner():GetViewModel():GetAttachment( self:GetOwner():GetViewModel():LookupAttachment( "1" ) )
-	ang = ang + Angle( self:GetOwner():GetViewModel():WorldToLocalAngles( attachment.Ang ).x, self:GetOwner():GetViewModel():WorldToLocalAngles( attachment.Ang ).y, self:GetOwner():GetViewModel():WorldToLocalAngles( attachment.Ang ).z )
+	local ViewModel = self:GetOwner():GetViewModel()
+	if not IsValid(ViewModel) then return pos, ang end
+
+	local attachment = ViewModel:GetAttachment( ViewModel:LookupAttachment( "1" ) )
+	if not attachment then return pos, ang end
+
+	ang = ang + ViewModel:WorldToLocalAngles( attachment.Ang )
 	return pos, ang
 end
 

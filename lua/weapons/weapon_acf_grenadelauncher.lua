@@ -12,7 +12,7 @@ SWEP.IconAngOffset			= Angle(0, 180, 0)
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/v_xm25.mdl"
 
-SWEP.ShotSound				= Sound(")acf_base/weapons/grenadelauncher.mp3")
+SWEP.ShotSound				= Sound("Weapon_SMG1.Double")
 SWEP.WorldModel             = "models/weapons/w_xm25.mdl"
 SWEP.HoldType               = "ar2"
 

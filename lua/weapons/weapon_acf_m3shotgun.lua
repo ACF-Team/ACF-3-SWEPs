@@ -63,7 +63,16 @@ function SWEP:DoReload()
 		self:SendWeaponAnim(ACT_VM_RELOAD)
 
 		self:SetNextPrimaryFire(CurTime() + self:SequenceDuration())
-		timer.Simple(self:SequenceDuration(), function() if self.Reloading then self:SetClip1(self:Clip1() + 1) self:GetOwner():RemoveAmmo(1, self.Primary.Ammo) self:DoReload() end end)
+		timer.Simple(self:SequenceDuration(), function()
+			if not IsValid(self) or not self.Reloading then return end
+
+			local Owner = self:GetOwner()
+			if not IsValid(Owner) then self.Reloading = false return end
+
+			self:SetClip1(self:Clip1() + 1)
+			Owner:RemoveAmmo(1, self.Primary.Ammo)
+			self:DoReload()
+		end)
 
 		self.NextShell = (CurTime() + self:SequenceDuration())
 	else

@@ -226,7 +226,8 @@ function SWEP:Initialize()
 	self:SetNW2Float("DragCoef", self.Bullet.DragCoef)
 	self:SetNW2String("AmmoType", self.Bullet.AmmoType)
 
-	if self.BulletModel then self:SetNW2String("BulletModel", self.BulletModel) self:SetNW2Float("BulletScale", self.BulletScale or 1) end
+	-- ACF's bullet effect reads the model from FlightModel, the scale is applied in the ACF_OnCreateBulletEffect hook
+	if self.BulletModel then self:SetNW2String("FlightModel", self.BulletModel) end
 
 	if self.Tracer > 0 then
 		self:SetNW2Float("Tracer", self.Tracer)
@@ -276,6 +277,7 @@ end
 
 function SWEP:ResolveAim()
 	local Ply = self:GetOwner()
+	if not Ply:IsPlayer() then return Ply:GetAimVector():Angle() end
 
 	return Ply:GetAimVector():Angle() + Ply:GetViewPunchAngles()
 end
@@ -285,8 +287,9 @@ function SWEP:ShootBullet(Pos, Dir)
 	local Ply = self:GetOwner()
 	local SelfTbl = self:GetTable()
 
+	local IsPlayer = Ply:IsPlayer()
 	local filter = {Ply, self}
-	if Ply:InVehicle() then
+	if IsPlayer and Ply:InVehicle() then
 		local vic = Ply:GetVehicle()
 		table.insert(filter, vic)
 
@@ -296,9 +299,9 @@ function SWEP:ShootBullet(Pos, Dir)
 	end
 
 	if SelfTbl.UseHybrid and SelfTbl.ACFType == "AP" then
-		Ply:LagCompensation(true)
+		if IsPlayer then Ply:LagCompensation(true) end
 		local tr = util.TraceLine({start = Pos, endpos = Pos + (Dir * math.min(1024, SelfTbl.ACFMuzzleVel * 39.37 * 0.05) + Ply:GetVelocity()), filter = filter, mask = mask})
-		Ply:LagCompensation(false)
+		if IsPlayer then Ply:LagCompensation(false) end
 
 		if tr.Hit and ACF.Check(tr.Entity) and (tr.Entity:IsPlayer() or tr.Entity:IsNPC()) then --Hybrid trace will fully initiate if it only hits player or npcs.
 			local DmgResult, DmgInfo = DmgObj.DamageResult(), DmgObj.DamageInfo()
@@ -389,8 +392,7 @@ function SWEP:CanPrimaryAttack()
 	-- Calls this hook to see if this gun is allowed to shoot an ACF shell
 	-- There isn't a way for the client to know about this, so we'll just replenish the clientside ammo
 	if SERVER and (ACF.GunsCanFire == false or hook.Run("ACF_FireShell", self) == false) then
-		self:SetNWInt("lastammo")
-		self:CallOnClient("ResetAmmo")
+		self:CallOnClient("ResetAmmo", tostring(self:Clip1()))
 
 		self.LastShot = CurTime()
 		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
@@ -462,8 +464,8 @@ function SWEP:PostShot(NumberShots)
 	self:TakePrimaryAmmo(NumberShots)
 end
 
-function SWEP:ResetAmmo() -- Only called clientside, to replenish "used" ammo if the server denies an ACF bullet being made
-	self:SetClip1(self:GetNWInt("lastammo", self:Clip1()))
+function SWEP:ResetAmmo(ServerClip) -- Only called clientside, to replenish "used" ammo if the server denies an ACF bullet being made
+	self:SetClip1(tonumber(ServerClip) or self:Clip1())
 	self:SetNextPrimaryFire(CurTime() + 0.2)
 	self:SendWeaponAnim(ACT_VM_IDLE)
 end
@@ -506,9 +508,12 @@ function SWEP:Deploy()
 	if CLIENT then
 		self.FOV = self:GetOwner():GetFOV()
 	else
+		local owner = self:GetOwner()
+
+		-- The bullet effect takes the tracer color from the gun, see SWEP:DrawWorldModel
 		if self.Tracer > 0 then
 			local Col = Color(255, 255, 255)
-			if self:GetOwner():IsPlayer() then Col = team.GetColor(self:GetOwner():Team()) end
+			if owner:IsPlayer() then Col = team.GetColor(owner:Team()) end
 			self:SetColor(Col)
 		end
 
@@ -520,22 +525,22 @@ function SWEP:Deploy()
 			end
 		end)
 
-		local owner = self:GetOwner()
+		if owner:IsPlayer() then
+			if not self.OriginalWalkSpeed then
+				self.OriginalWalkSpeed = owner:GetWalkSpeed()
+				self.OriginalRunSpeed = owner:GetRunSpeed()
+			end
 
-		if not self.OriginalWalkSpeed then
-			self.OriginalWalkSpeed = owner:GetWalkSpeed()
-			self.OriginalRunSpeed = owner:GetRunSpeed()
-		end
+			self.NormalPlayerWalkSpeed = self.OriginalWalkSpeed
+			self.NormalPlayerRunSpeed = self.OriginalRunSpeed
 
-		self.NormalPlayerWalkSpeed = self.OriginalWalkSpeed
-		self.NormalPlayerRunSpeed = self.OriginalRunSpeed
-
-		if  GetConVar("acf_sweps_speed_mult", 1):GetBool() then
-			owner:SetWalkSpeed( self.NormalPlayerWalkSpeed * self.CarrySpeedMul)
-			owner:SetRunSpeed( self.NormalPlayerRunSpeed * self.CarrySpeedMul)
-		else
-			owner:SetWalkSpeed( self.NormalPlayerWalkSpeed )
-			owner:SetRunSpeed( self.NormalPlayerRunSpeed )
+			if  GetConVar("acf_sweps_speed_mult", 1):GetBool() then
+				owner:SetWalkSpeed( self.NormalPlayerWalkSpeed * self.CarrySpeedMul)
+				owner:SetRunSpeed( self.NormalPlayerRunSpeed * self.CarrySpeedMul)
+			else
+				owner:SetWalkSpeed( self.NormalPlayerWalkSpeed )
+				owner:SetRunSpeed( self.NormalPlayerRunSpeed )
+			end
 		end
 	end
 
@@ -585,7 +590,7 @@ function SWEP:Reload()
 	local DidReload = self:DefaultReload( ACT_VM_RELOAD ) -- If this is successful, SWEP:Think doesn't run, so we have to handle anything that should happen in there
 	if DidReload and not self.Reloading then
 		self:SetNWBool("iron", false)
-		timer.Simple(self:SequenceDuration() * 0.9, function() self.Reloading = false end)
+		timer.Simple(self:SequenceDuration() * 0.9, function() if IsValid(self) then self.Reloading = false end end)
 	end
 	self.Reloading = DidReload
 end
@@ -611,10 +616,9 @@ function SWEP:Think()
 	local Owner = self:GetOwner()
 	if self.BurstShots and Owner:IsPlayer() and not Owner:KeyDown(IN_ATTACK) then self.BurstShots = 0 end
 
-	if SERVER then
+	if SERVER and Owner:IsPlayer() then
 		local ct = CurTime()
 		if ct > (self.NextThinkTime or 0) then
-			local Owner = self:GetOwner()
 			local Condition = (Owner:IsOnGround()) and (not Owner:IsSprinting())
 			and Owner:KeyDown(IN_ATTACK2)
 			and (not Owner:KeyDown(IN_USE))
@@ -666,7 +670,7 @@ function SWEP:CalcDropTable()
 		Bullet.NextPos = Bullet.Pos + ACF.Scale * CheapTime * Bullet.Flight
 		Bullet.Flight = Bullet.Flight + (Bullet.Accel - Drag) * CheapTime
 		Int = Int + 1
-		if (math.abs(Bullet.Pos.x) > 32768) or (math.abs(Bullet.Pos.z) < -32768) or (Int > 2000) then Valid = false end
+		if (math.abs(Bullet.Pos.x) > 32768) or (Bullet.Pos.z < -32768) or (Int > 2000) then Valid = false end
 	end
 
 	if #DropTable > 0 then DropTable = table.Reverse(DropTable) end
@@ -677,7 +681,8 @@ end
 
 function SWEP:Recoil(PunchAmt)
 	local Ply = self:GetOwner()
-	if Ply:IsPlayer() and (Ply:IsSprinting() and (Ply:GetAbsVelocity():LengthSqr() > 10000)) then return false end
+	if not Ply:IsPlayer() then return false end
+	if Ply:IsSprinting() and (Ply:GetAbsVelocity():LengthSqr() > 10000) then return false end
 	Ply:ViewPunch(PunchAmt)
 end
 
@@ -732,22 +737,30 @@ if CLIENT then
 		self:HandleRecoil()
 	end
 
-	function SWEP:DrawWorldModel()
-		self:SetColor(White)
-		if not self.CustomWorldModelPos then self:DrawModel() return end
+	function SWEP:PlaceWorldModel()
+		if not self.CustomWorldModelPos then return end
 		local owner = self:GetOwner()
-		if not IsValid(owner) then self:DrawModel() return end
+		if not IsValid(owner) then return end
 		local bone = owner:LookupBone("ValveBiped.Bip01_R_Hand")
-		if not bone then self:DrawModel() return end
+		if not bone then return end
 		local vmat = owner:GetBoneMatrix(bone)
-		if not vmat then self:DrawModel() return end
+		if not vmat then return end
 
 		local Pos, Ang = LocalToWorld(self.OffsetWorldModelPos, self.OffsetWorldModelAng, vmat:GetTranslation(), vmat:GetAngles())
 
 		self:SetPos(Pos)
 		self:SetAngles(Ang)
 		self:SetupBones()
+	end
+
+	function SWEP:DrawWorldModel()
+		self:PlaceWorldModel()
+
+		-- The networked color is the tracer color ACF reads from the gun, so only draw white and put it back afterwards
+		local TracerCol = self:GetColor()
+		self:SetColor(White)
 		self:DrawModel()
+		self:SetColor(TracerCol)
 	end
 
 	-- Same condition the server uses for "iron", read from local input so the sights respond without waiting on the network
@@ -792,9 +805,6 @@ if CLIENT then
 		local Up, Right, Forward = Ang:Up(), Ang:Right(), Ang:Forward()
 		local Mul = math.ease.InOutQuad(math.min(self.IronScale / 0.75, 1))
 
-		local Owner = self:GetOwner()
-		local ep = Owner:EyePos()
-
 		local IronPos = self.IronSightPos
 		local IronAng = self.IronSightAng
 
@@ -836,7 +846,6 @@ if CLIENT then
 		local ViewShift = (IronPos * Mul) + (IdlePos * (1 - Mul))
 		Pos = Pos + (ViewShift.x * Right) + (ViewShift.y * Forward) + (ViewShift.z * Up)
 
-		LastVMPos = ep
 		return Pos, Ang
 	end
 

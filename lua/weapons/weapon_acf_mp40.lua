@@ -92,5 +92,5 @@ function SWEP:PrimaryAttack()
 
 	self:PostShot(1)
 
-	timer.Simple(0.5, function() if (Ply:GetActiveWeapon() == self) and self:GetSequenceName(self:GetSequence()) ~= "reload" then self:SendWeaponAnim(ACT_VM_IDLE) end end)
+	timer.Simple(0.5, function() if IsValid(self) and IsValid(Ply) and (Ply:GetActiveWeapon() == self) and self:GetSequenceName(self:GetSequence()) ~= "reload" then self:SendWeaponAnim(ACT_VM_IDLE) end end)
 end

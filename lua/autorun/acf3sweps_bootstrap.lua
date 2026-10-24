@@ -155,6 +155,14 @@ if CLIENT then
 
 	list.Set("ContentCategoryIcons", Category, "vgui/entities/acf_logo.png")
 
+	-- ACF sizes the flight model by caliber, which shrinks models like the crossbow bolt to nothing
+	hook.Add("ACF_OnCreateBulletEffect", "ACF SWEPs Bullet Model Scale", function(Effect, BulletData)
+		local Gun = BulletData.Crate
+		if not IsValid(Gun) or not Gun:IsWeapon() or not Gun.BulletModel then return end
+
+		Effect:SetModelScale(Gun.BulletScale or 1, 0)
+	end)
+
 	timer.Simple(0, function()
 		-- TODO: Remove after the update
 		if VERSION < 260901 then return end
@@ -250,7 +258,7 @@ do
 	sound.Add({name = "Weapon_K98.ClipIn2", channel = 3, volume = 0.5, level = 75, pitch = 100, sound = "k98/k98_clipin2.wav"})
 	sound.Add({name = "Weapon_K98.ClipOut", channel = 6, volume = 1, level = 75, pitch = 100, sound = "k98/k98_clipout.wav"})
 	sound.Add({name = "Weapon_K98.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_K98.SinglShotReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "k98/k98_singleshotreload.wav"})
+	sound.Add({name = "Weapon_K98.SingleShotReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "k98/k98_singleshotreload.wav"})
 	sound.Add({name = "Weapon_K98.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "k98/k98_worldreload.wav"})
 
 	sound.Add({name = "Weapon_Luger.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^p38/p38_shoot.wav"})
@@ -299,7 +307,7 @@ do
 
 	sound.Add({name = "Weapon_Springfield.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^springfield/spring_shoot.wav"})
 	sound.Add({name = "Weapon_Springfield.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Springfield.SinglShotReload", channel = 3, volume = 0.76953125, level = 75, pitch = 0, sound = "k98/k98_singleshotreload.wav"})
+	sound.Add({name = "Weapon_Springfield.SingleShotReload", channel = 3, volume = 0.76953125, level = 75, pitch = 100, sound = "k98/k98_singleshotreload.wav"})
 	sound.Add({name = "Weapon_Springfield.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "k98/k98_worldreload.wav"})
 
 	sound.Add({name = "Weapon_Thompson.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^thompson/thompson_shoot.wav"})

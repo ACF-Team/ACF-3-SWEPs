@@ -87,8 +87,6 @@ function SWEP:PrimaryAttack()
 		local Dir = (Aim:Forward() + Spread):GetNormalized()
 
 		self:ShootBullet(Ply:GetShootPos(), Dir)
-	else
-		timer.Simple(self.Primary.Delay * 0.8, function() self.TempOut = false end)
 	end
 
 	self:PostShot(1)
@@ -99,7 +97,7 @@ function SWEP:Reload()
 	local DidReload = self:DefaultReload( ACT_VM_RELOAD ) -- If this is successful, SWEP:Think doesn't run, so we have to handle anything that should happen in there
 	if DidReload and not self.Reloading then
 		self:SetNWBool("iron", false)
-		timer.Simple(self:SequenceDuration() * 0.9, function() self.Reloading = false end)
+		timer.Simple(self:SequenceDuration() * 0.9, function() if IsValid(self) then self.Reloading = false end end)
 		self:EmitSound("Weapon_Crossbow.Reload")
 		timer.Simple(0.62, function()
 			if not IsValid(self) then return end

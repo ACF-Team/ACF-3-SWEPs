@@ -72,7 +72,7 @@ function SWEP:PrimaryAttack()
 		self:ShootBullet(Ply:GetShootPos(), Dir)
 	else
 		self.TempOut = true
-		timer.Simple(self.Primary.Delay * 0.8, function() self.TempOut = false end)
+		timer.Simple(self.Primary.Delay * 0.8, function() if IsValid(self) then self.TempOut = false end end)
 	end
 
 	self:PostShot(1)
