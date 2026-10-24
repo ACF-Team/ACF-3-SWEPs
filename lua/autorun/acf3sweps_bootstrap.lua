@@ -202,7 +202,7 @@ do
 		-- SideWinderGrowl.wav by FrazierWing, CC0: https://freesound.org/people/FrazierWing/sounds/569666/
 		{"Weapon_FIM92.Seeker", "weapons/fim92/seeker_growl.wav", {channel = CHAN_STATIC, volume = 0.5, level = 60}},
 		-- Vanilla-Styled FIM-92 Stinger by Rocks: https://steamcommunity.com/sharedfiles/filedetails/?id=3807683332
-		{"Weapon_FIM92.Shoot", "^weapons/fim92/fire.wav", Shot},
+		{"Weapon_FIM92.Shoot", "^acf_missiles/missiles/missile_rocket.mp3", Shot},
 		{"Weapon_FIM92.Deploy", "weapons/fim92/deploy.wav", Draw},
 		{"Weapon_FIM92.ShellIn", "bazooka/rocket_clipin.wav"},
 

@@ -28,6 +28,9 @@ SWEP.SlotPos                = 0
 SWEP.Spawnable              = true
 SWEP.AdminOnly              = false
 
+SWEP.Scope 					= true
+SWEP.Zoom					= 1
+
 SWEP.m_WeaponDeploySpeed    = 1
 SWEP.Spread                 = 0.25
 SWEP.RecoilMod              = 0.2
@@ -59,11 +62,11 @@ SWEP.MissileGuidance		= "ACF.Missiles.Guidance.Infrared"
 SWEP.MissileFuze			= {Type = "ACF.Missiles.Fuze.Radio", Data = {FuzeDistance = 300}}
 
 -- The seeker looks while aimed, growls when it sees a target and locks onto it after holding it this long
-SWEP.LockTime				= 1
+SWEP.LockTime				= 2
 SWEP.SeekInterval			= 0.1
 SWEP.LockPitch				= 170 -- Pitch of the growl once locked
 
-SWEP.IronSightPos			= Vector(-2, -4, 1)
+SWEP.IronSightPos			= Vector(-1, -12, -0.5)
 SWEP.IdlePos				= Vector(3, 5, -1.5)
 SWEP.SprintAng				= Angle(-10, -10, 0)
 
