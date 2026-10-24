@@ -62,5 +62,5 @@ SWEP.ReloadSounds			= {
 SWEP:SetupACFBullet()
 
 function SWEP:OnShotFired()
-	self:EmitSound("Weapon_Crossbow.BoltFly")
+	self:EmitPredictedSound("Weapon_Crossbow.BoltFly")
 end

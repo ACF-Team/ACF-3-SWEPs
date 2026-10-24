@@ -150,16 +150,40 @@ SWEP.DropCalc				= {}
 SWEP.CalcRun				= false
 SWEP.IronScale              = 0
 SWEP.SprintScale			= 0
-SWEP.NextAttack2Toggle      = 0
-SWEP.LastShot				= 0
 SWEP.MeasuredPen			= 0
 SWEP.MeasuredPen2			= 0
 SWEP.DisableDuplicator		= true -- why oh why do I even have to do this
 SWEP.RateTime				= 0
-SWEP.Reloading				= false
 
 SWEP.IconOverride			= "materials/vgui/entities/acf_logo.png"
 local FiremodeSound = Sound("Weapon_SMG1.Special2")
+
+-- Weapon state lives in network vars so the owner's client predicts it along with the server
+-- Times are CurTime() values, 0 means not set
+function SWEP:SetupDataTables()
+	self:NetworkVar("Bool", 0, "Iron") -- Aimed down sights
+	self:NetworkVar("Bool", 1, "Reloading") -- Also keeps the sights down
+	self:NetworkVar("Bool", 2, "ReloadStopQueued") -- The trigger was pulled during a shell reload
+
+	self:NetworkVar("Int", 0, "FireMode") -- 1 automatic, 2 semi-automatic, 3 burst
+	self:NetworkVar("Int", 1, "BurstShots") -- Shots fired since the trigger was pulled
+	self:NetworkVar("Int", 2, "AimSetting") -- Index into SWEP.AimTable
+	self:NetworkVar("Int", 3, "ReloadRounds") -- Rounds being loaded by a manual reload
+	self:NetworkVar("Int", 4, "ReloadSoundIndex") -- Next entry of SWEP.ReloadSounds to play
+
+	self:NetworkVar("Float", 0, "LastShot") -- Drives the bloom from firing
+	self:NetworkVar("Float", 1, "ReloadStart")
+	self:NetworkVar("Float", 2, "ReloadEnd")
+	self:NetworkVar("Float", 3, "ScopeBlinkEnd")
+	self:NetworkVar("Float", 4, "FireAnimEnd")
+end
+
+-- Sounds from predicted code, only played the first time the client predicts them
+function SWEP:EmitPredictedSound(Sound)
+	if CLIENT and not IsFirstTimePredicted() then return end
+
+	self:EmitSound(Sound)
+end
 
 function SWEP:SetupACFBullet()
 	local Area = math.pi * (self.Caliber * 0.05) ^ 2
@@ -231,13 +255,9 @@ end
 
 function SWEP:Initialize()
 	self.FiremodeSetting = math.Clamp(math.floor(self.FiremodeSetting), 1, 3)
-	self.CurrentFiremode = math.Clamp(math.floor(self.CurrentFiremode), 1, self.FiremodeSetting)
-
-	if self.FiremodeSetting ~= 1 then
-		-- Burst fire needs the weapon to keep firing while the trigger is held, CanPrimaryAttack cuts it off after the burst
-		self.Primary.Automatic = self.CurrentFiremode ~= 2
-	end
-	self:UpdateFiremode()
+	self:SetFireMode(math.Clamp(math.floor(self.CurrentFiremode), 1, self.FiremodeSetting))
+	self:SetAimSetting(1)
+	self:SyncAutomatic()
 
 	self:SetHoldType(self.HoldType)
 
@@ -262,8 +282,7 @@ end
 function SWEP:GetAimMod()
 	local Owner = self:GetOwner()
 	if Owner:IsNPC() then return 1 end
-	local LastShot = 0
-	if SERVER then LastShot = self.LastShot else LastShot = math.max(self:GetNWFloat("lastshot", CurTime()), self.LastShot) end
+	local LastShot = self:GetLastShot()
 
 	local Prone = false
 	if Owner.IsProne then Prone = Owner:IsProne() end -- Prone mod support
@@ -274,12 +293,29 @@ function SWEP:GetAimMod()
 	local OnGround = (OwnerOnGround and 1 or 3)
 	local Bloom = (1 - math.Clamp((CurTime() - LastShot) * self.Recovery, 0, 1)) * self.Spread * 6 * (1 / (self.Handling / math.min(1, 1.3 * StanceMod)))
 	if SERVER then
-		local Focus = (self:GetNWBool("iron") and (not Owner:IsSprinting()) and self.AimFocused or self.AimUnfocused)
+		local Focus = (self:GetIron() and (not Owner:IsSprinting()) and self.AimFocused or self.AimUnfocused)
 		return math.min(30, ((Focus * StanceMod) + Bloom + VelMod) * OnGround)
 	else
+		-- Follows the sights as they come up, this is only used to draw the crosshair
 		local Focus = Lerp((not Owner:IsSprinting()) and self.IronScale or 0, self.AimUnfocused, self.AimFocused)
 		return math.min(30, ((Focus * StanceMod) + Bloom + VelMod) * OnGround)
 	end
+end
+
+-- Whether the owner is holding the sights up, SWEP:Think stores this in the Iron network var
+function SWEP:IsAiming()
+	local Owner = self:GetOwner()
+	if not Owner:IsPlayer() then return false end
+
+	return Owner:IsOnGround() and not Owner:IsSprinting() and Owner:KeyDown(IN_ATTACK2) and not Owner:KeyDown(IN_USE)
+end
+
+-- Primary.Automatic is read by the engine, so it follows the fire mode on both realms
+-- Burst fire needs the weapon to keep firing while the trigger is held, CanPrimaryAttack cuts it off after the burst
+function SWEP:SyncAutomatic()
+	if self.FiremodeSetting == 1 then return end
+
+	self.Primary.Automatic = self:GetFireMode() ~= 2
 end
 
 local function ShootACFBullet(swep, Pos, Dir, Filter)
@@ -381,32 +417,23 @@ end
 
 local IsSinglePlayer = game.SinglePlayer()
 
+-- Runs on every prediction pass like the rest of the firing code, only the effects check IsFirstTimePredicted
 function SWEP:CanPrimaryAttack()
-	if not IsFirstTimePredicted() then return false end
-
 	self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-
-	if self.Primary.Automatic ~= self:GetNWBool("automatic", false) then self:UpdateFiremode() end
+	self:SyncAutomatic()
 
 	-- The burst is spent, wait for the trigger to be released (see SWEP:Think)
-	if self:GetNWInt("firemode", 1) == 3 and (self.BurstShots or 0) >= self.BurstSize then return false end
-
-	if self:GetOwner():IsPlayer() then
-		if SERVER and IsSinglePlayer then self:CallOnClient("PrimaryAttack") end
-
-		if CLIENT and (CurTime() - self.LastShot) < self.Primary.Delay then return end
-	end
+	if self:GetFireMode() == 3 and self:GetBurstShots() >= self.BurstSize then return false end
 
 	if self:Clip1() <= 0 then
-		self:EmitSound("Weapon_Pistol.Empty")
+		self:EmitPredictedSound("Weapon_Pistol.Empty")
 
 		-- DefaultReload refuses to start while the next shot is pending
 		self:SetNextPrimaryFire(CurTime())
 		self:Reload()
 		self:SetNextPrimaryFire(math.max(self:GetNextPrimaryFire(), CurTime() + 0.25))
 
-		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
+		self:SetLastShot(CurTime())
 
 		return false
 	end
@@ -415,12 +442,9 @@ function SWEP:CanPrimaryAttack()
 	if Owner:IsPlayer() and (Owner:IsSprinting() and (Owner:GetAbsVelocity():LengthSqr() > 10000)) then return false end
 
 	-- Calls this hook to see if this gun is allowed to shoot an ACF shell
-	-- There isn't a way for the client to know about this, so we'll just replenish the clientside ammo
+	-- The client can't know about this and predicts the shot, the server's ammo count corrects it
 	if SERVER and (ACF.GunsCanFire == false or hook.Run("ACF_FireShell", self) == false) then
-		self:CallOnClient("ResetAmmo", tostring(self:Clip1()))
-
-		self.LastShot = CurTime()
-		if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
+		self:SetLastShot(CurTime())
 
 		return false
 	end
@@ -445,14 +469,14 @@ end
 -- Launchers can only be fired from the shoulder
 function SWEP:CanFireNow()
 	local Owner = self:GetOwner()
-	if not self.RequiresAim or not Owner:IsPlayer() or self:GetNWBool("iron", false) then return true end
+	if not self.RequiresAim or not Owner:IsPlayer() or self:GetIron() then return true end
 
 	if SERVER then Owner:PrintMessage(HUD_PRINTCENTER, "You have to aim first!") end
 
 	return false
 end
 
--- Called after a shot has been fired, on both realms
+-- Called after a shot has been fired, on both realms and on every prediction pass (use SWEP:EmitPredictedSound)
 function SWEP:OnShotFired()
 end
 
@@ -496,111 +520,79 @@ function SWEP:FireShots()
 	end
 end
 
-function SWEP:GetAimSetting()
+function SWEP:GetAimSettingData()
 	local AimTable = self.AimTable
 	if not AimTable then return end
 
-	return AimTable[self:GetNW2Int("aimsetting", 1)]
+	return AimTable[self:GetAimSetting()]
 end
 
 function SWEP:GetPitchAdjust()
-	local AimSetting = self:GetAimSetting()
+	local AimSetting = self:GetAimSettingData()
 	if AimSetting then return AimSetting.PitchAdjust or 0 end
 
 	return self.PitchAdjust or 0
 end
 
 function SWEP:IsScopeBlinking()
-	return CurTime() < (self.ScopeBlinkEnd or 0)
+	return CurTime() < self:GetScopeBlinkEnd()
 end
 
 function SWEP:PostShot(NumberShots)
-	self:EmitSound(self.ShotSound)
-
-	-- Fire animations usually pull the gun off the sights, so keep it steady while aiming (scoped weapons hide the viewmodel anyway)
-	local Aiming = (CLIENT and self:IsAiming()) or (SERVER and self:GetNWBool("iron", false))
+	self:EmitPredictedSound(self.ShotSound)
 
 	self:SendWeaponAnim(ACT_VM_IDLE)
-	if self.AimFireAnim or self.Scope or not Aiming then
+	-- Fire animations usually pull the gun off the sights, so keep it steady while aiming (scoped weapons hide the viewmodel anyway)
+	if self.AimFireAnim or self.Scope or not self:GetIron() then
 		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 
-		if self.FireAnimTime then self.FireAnimEnd = CurTime() + self.FireAnimTime end
+		if self.FireAnimTime then self:SetFireAnimEnd(CurTime() + self.FireAnimTime) end
 	end
 
-	if self.ScopeBlinkOnFire then self.ScopeBlinkEnd = CurTime() + self.Primary.Delay * 0.8 end
+	if self.ScopeBlinkOnFire then self:SetScopeBlinkEnd(CurTime() + self.Primary.Delay * 0.8) end
 
 	if CLIENT then
 		if IsFirstTimePredicted() then self:ShotEffects() end
 	elseif IsSinglePlayer then
-		-- The client never runs the shot itself in single player (it is not "first time predicted"), so hand it the effects
+		-- The client never runs the shot itself in single player, so hand it the effects
 		self:CallOnClient("ShotEffects")
 	end
 
 	self:GetOwner():MuzzleFlash()
 	self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 
-	self.LastShot = CurTime()
-	if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
-
-	self.BurstShots = (self.BurstShots or 0) + 1
+	self:SetLastShot(CurTime())
+	self:SetBurstShots(self:GetBurstShots() + 1)
 
 	self:TakePrimaryAmmo(NumberShots)
 end
 
-function SWEP:ResetAmmo(ServerClip) -- Only called clientside, to replenish "used" ammo if the server denies an ACF bullet being made
-	self:SetClip1(tonumber(ServerClip) or self:Clip1())
-	self:SetNextPrimaryFire(CurTime() + 0.2)
-	self:SendWeaponAnim(ACT_VM_IDLE)
-end
-
 -- Use + secondary fire cycles the sight settings if the weapon has them, the fire mode otherwise
 function SWEP:SecondaryAttack()
-	local Owner = self:GetOwner()
-	if not Owner:KeyDown(IN_USE) or CurTime() <= self.NextAttack2Toggle then return true end
+	if not self:GetOwner():KeyDown(IN_USE) then return end
 
 	if self.AimTable then
 		self:CycleAimSetting()
 	elseif self.FiremodeSetting ~= 1 then
 		self:CycleFiremode()
 	else
-		return true
+		return
 	end
 
-	if CLIENT then self:EmitSound(FiremodeSound) end
-
-	self.NextAttack2Toggle = CurTime() + 0.25
-	return true
+	self:EmitPredictedSound(FiremodeSound)
+	self:SetNextSecondaryFire(CurTime() + 0.25)
 end
 
 function SWEP:CycleFiremode()
-	if CLIENT then return end
-
-	local A = self.CurrentFiremode + 1
-	if A > self.FiremodeSetting then A = 1 end
-
-	self.CurrentFiremode = A
-	self.Primary.Automatic = A ~= 2
-
-	self:UpdateFiremode()
+	self:SetFireMode(self:GetFireMode() % self.FiremodeSetting + 1)
+	self:SyncAutomatic()
 end
 
 function SWEP:CycleAimSetting()
-	if CLIENT then return end
+	local Setting = self:GetAimSetting() % #self.AimTable + 1
 
-	local Setting = self:GetNW2Int("aimsetting", 1) % #self.AimTable + 1
-
-	self:SetNW2Int("aimsetting", Setting)
-	self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Range: " .. self.AimTable[Setting].Text)
-end
-
-function SWEP:UpdateFiremode()
-	if SERVER then
-		self:SetNWInt("firemode", self.CurrentFiremode)
-		self:SetNWBool("automatic", self.Primary.Automatic)
-		self:CallOnClient("UpdateFiremode")
-	end
-
-	if self.Primary.Automatic ~= self:GetNWBool("automatic", false) then self.Primary.Automatic = self:GetNWBool("automatic", false) end
+	self:SetAimSetting(Setting)
+	if SERVER then self:GetOwner():PrintMessage(HUD_PRINTCENTER, "Range: " .. self.AimTable[Setting].Text) end
 end
 
 function SWEP:Deploy()
@@ -616,14 +608,6 @@ function SWEP:Deploy()
 			if owner:IsPlayer() then Col = team.GetColor(owner:Team()) end
 			self:SetColor(Col)
 		end
-
-		-- Hopefully fixes some weird problem with weapons not "recoiling" as they should
-		self.Primary.Automatic = false
-		timer.Simple(0, function()
-			if IsValid(self) then
-				self.Primary.Automatic = self:GetNWBool("automatic", false)
-			end
-		end)
 
 		if owner:IsPlayer() then
 			if not self.OriginalWalkSpeed then
@@ -646,8 +630,8 @@ function SWEP:Deploy()
 
 	if self.HasDropCalc then self.DropCalc = self:CalcDropTable() end
 
-	self.LastShot = CurTime()
-	if SERVER then self:SetNWFloat("lastshot", self.LastShot) end
+	self:SyncAutomatic()
+	self:SetLastShot(CurTime())
 
 	-- self.Owner = self:GetOwner() -- A quick way to match what ACF does for this
 
@@ -668,14 +652,13 @@ function SWEP:OnRemove()
 	end
 end
 
+-- Has to return true on every call, returning nothing refuses the weapon switch
 function SWEP:Holster()
-	if not IsFirstTimePredicted() then return end
 	self:CancelReload()
-	self.Reloading = (self:Clip1() <= 0) and (self:Ammo1() > 0)
-	self.FireAnimEnd = nil
-	self.ScopeBlinkEnd = nil
-
-	self:SetNWBool("iron", false)
+	self:SetReloading((self:Clip1() <= 0) and (self:Ammo1() > 0))
+	self:SetFireAnimEnd(0)
+	self:SetScopeBlinkEnd(0)
+	self:SetIron(false)
 	self.IronScale = 0
 
 	if SERVER then
@@ -695,38 +678,38 @@ local ReloadTypes = {}
 -- The engine does not call SWEP:Think during DefaultReload, so this finishes on the first Think after it
 ReloadTypes.magazine = {
 	Start = function(self)
-		if not self:DefaultReload(self.ReloadAct) then self.Reloading = false return false end
+		if not self:DefaultReload(self.ReloadAct) then self:SetReloading(false) return false end
 
-		self.ReloadEnd = CurTime() + self:SequenceDuration()
+		self:SetReloadEnd(CurTime() + self:SequenceDuration())
 		return true
 	end,
 	Finish = function(self)
-		self.Reloading = false
+		self:SetReloading(false)
 	end,
 }
 
 -- Loads the missing rounds in one go once ReloadEnd is reached
 local function StartManualReload(self, Duration)
-	self.ReloadRounds = math.min(self.Primary.ClipSize - self:Clip1(), self:Ammo1())
+	self:SetReloadRounds(math.min(self.Primary.ClipSize - self:Clip1(), self:Ammo1()))
 	self:SendWeaponAnim(self.ReloadAct)
 	self:GetOwner():SetAnimation(PLAYER_RELOAD)
-	self.ReloadEnd = CurTime() + Duration(self)
+	self:SetReloadEnd(CurTime() + Duration(self))
 
 	return true
 end
 
 local function FinishManualReload(self)
-	local Rounds = math.min(self.ReloadRounds, self:Ammo1())
+	local Rounds = math.min(self:GetReloadRounds(), self:Ammo1())
 
 	self:SendWeaponAnim(ACT_VM_IDLE)
 	self:SetClip1(self:Clip1() + Rounds)
 	self:GetOwner():RemoveAmmo(Rounds, self.Primary.Ammo)
-	self.Reloading = false
+	self:SetReloading(false)
 end
 
 local function RoundsDuration(self)
 	-- The animation loads a full clip, about a sixth of it per round after the first second
-	return (self:SequenceDuration() - 1) / 6 * self.ReloadRounds + self.ReloadFinishOffset
+	return (self:SequenceDuration() - 1) / 6 * self:GetReloadRounds() + self.ReloadFinishOffset
 end
 
 local function AnimationDuration(self)
@@ -743,17 +726,24 @@ ReloadTypes.animation = {
 	Finish = FinishManualReload,
 }
 
+-- Pumps the gun if the model has an animation for it, the next shot waits for it
 local function FinishShellReload(self)
-	self.ReloadEnd = nil
-	self.Reloading = false
-	self:SendWeaponAnim(ACT_VM_IDLE)
-	self:SetNextPrimaryFire(CurTime() + self:SequenceDuration())
+	self:SetReloadEnd(0)
+	self:SetReloading(false)
+
+	local ViewModel = self:GetOwner():GetViewModel()
+	if IsValid(ViewModel) and ViewModel:SelectWeightedSequence(ACT_SHOTGUN_RELOAD_FINISH) >= 0 then
+		self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
+		self:SetNextPrimaryFire(CurTime() + self:SequenceDuration())
+	else
+		self:SendWeaponAnim(ACT_VM_IDLE)
+	end
 end
 
 local function LoadNextShell(self)
 	self:SendWeaponAnim(self.ReloadAct)
-	self.ReloadEnd = CurTime() + self:SequenceDuration()
-	self:SetNextPrimaryFire(self.ReloadEnd)
+	self:SetReloadEnd(CurTime() + self:SequenceDuration())
+	self:SetNextPrimaryFire(self:GetReloadEnd())
 end
 
 ReloadTypes.shell = {
@@ -762,11 +752,15 @@ ReloadTypes.shell = {
 
 		return true
 	end,
+	-- Each shell holds off the next shot until it's in, so the trigger is noticed here and stops the reload after it
+	Think = function(self)
+		if self:Clip1() > 0 and self:GetOwner():KeyDown(IN_ATTACK) then self:SetReloadStopQueued(true) end
+	end,
 	Finish = function(self)
 		self:SetClip1(self:Clip1() + 1)
 		self:GetOwner():RemoveAmmo(1, self.Primary.Ammo)
 
-		if self:Clip1() < self.Primary.ClipSize and self:Ammo1() > 0 then
+		if self:Clip1() < self.Primary.ClipSize and self:Ammo1() > 0 and not self:GetReloadStopQueued() then
 			LoadNextShell(self)
 		else
 			FinishShellReload(self)
@@ -784,16 +778,21 @@ function SWEP:GetReloadType()
 	return ReloadTypes[self.ReloadType] or ReloadTypes.magazine
 end
 
+function SWEP:IsReloadPending()
+	return self:GetReloadEnd() > 0
+end
+
 function SWEP:Reload()
-	if self.ReloadEnd then return end
+	if self:IsReloadPending() then return end
 	if self.ReloadType ~= "magazine" and (self:Clip1() >= self.Primary.ClipSize or self:Ammo1() <= 0) then return end
 
 	if not self:GetReloadType().Start(self) then return end
 
-	self:SetNWBool("iron", false)
-	self.Reloading = true
-	self.ReloadStart = CurTime()
-	self.ReloadSoundIndex = 1
+	self:SetIron(false)
+	self:SetReloading(true)
+	self:SetReloadStopQueued(false)
+	self:SetReloadStart(CurTime())
+	self:SetReloadSoundIndex(1)
 
 	self:PlayReloadSounds()
 end
@@ -803,43 +802,49 @@ function SWEP:PlayReloadSounds()
 	local Sounds = self.ReloadSounds
 	if not Sounds then return end
 
-	local Elapsed = CurTime() - self.ReloadStart
-	local Next = Sounds[self.ReloadSoundIndex]
+	local Elapsed = CurTime() - self:GetReloadStart()
+	local Index = self:GetReloadSoundIndex()
+	local Next = Sounds[Index]
 
 	while Next and Elapsed >= Next.Time do
-		self:EmitSound(Next.Sound)
-		self.ReloadSoundIndex = self.ReloadSoundIndex + 1
-		Next = Sounds[self.ReloadSoundIndex]
+		self:EmitPredictedSound(Next.Sound)
+		Index = Index + 1
+		Next = Sounds[Index]
 	end
+
+	self:SetReloadSoundIndex(Index)
 end
 
 -- From SWEP:Think
 function SWEP:UpdateReload()
-	if not self.ReloadEnd then return end
+	if not self:IsReloadPending() then return end
 
 	self:PlayReloadSounds()
 
-	if CurTime() < self.ReloadEnd then return end
+	local ReloadType = self:GetReloadType()
+	if ReloadType.Think then ReloadType.Think(self) end
 
-	self.ReloadEnd = nil
+	if CurTime() < self:GetReloadEnd() then return end
+
+	self:SetReloadEnd(0)
 	self:GetReloadType().Finish(self)
 end
 
 -- Returns true if firing was used up stopping a reload
 function SWEP:InterruptReload()
-	if not self.ReloadEnd then return false end
+	if not self:IsReloadPending() then return false end
 
 	local Interrupt = self:GetReloadType().Interrupt
 	return Interrupt and Interrupt(self) or false
 end
 
 function SWEP:CancelReload()
-	self.ReloadEnd = nil
-	self.ReloadRounds = nil
+	self:SetReloadEnd(0)
+	self:SetReloadRounds(0)
 end
 
 function SWEP:GetPunch()
-	return Angle(-self.PunchAmount, 0, 0) * self.RecoilMod * (self:GetNWBool("iron", false) and 0.4 or 1)
+	return Angle(-self.PunchAmount, 0, 0) * self.RecoilMod * (self:GetIron() and 0.4 or 1)
 end
 
 function SWEP:GetNPCBulletSpread()
@@ -854,49 +859,42 @@ function SWEP:GetNPCRestTimes()
 	return self.Primary.Delay, self.Primary.Delay * 5
 end
 
+-- Raises or lowers the sights, on both realms so the client predicts it
+function SWEP:UpdateIron()
+	local Aiming = self:IsAiming()
+	if self:GetIron() == Aiming then return end
+
+	self:SetIron(Aiming)
+
+	if self.CustomAnim then
+		self:SendWeaponAnim(Aiming and self.AimAnim or self.IdleAnim)
+	end
+
+	if self.FakeFire then -- bump the accuracy a bit
+		self:SetLastShot(CurTime() + (self.Primary.Delay / 2))
+	end
+end
+
 function SWEP:Think()
-	-- A new burst can start once the trigger has been let go
 	local Owner = self:GetOwner()
-	if self.BurstShots and Owner:IsPlayer() and not Owner:KeyDown(IN_ATTACK) then self.BurstShots = 0 end
+	if not Owner:IsPlayer() then return end
 
+	-- A new burst can start once the trigger has been let go
+	if not Owner:KeyDown(IN_ATTACK) then self:SetBurstShots(0) end
+
+	self:SyncAutomatic()
 	self:UpdateReload()
+	self:UpdateIron()
 
-	if self.FireAnimEnd and CurTime() >= self.FireAnimEnd then
-		self.FireAnimEnd = nil
+	local FireAnimEnd = self:GetFireAnimEnd()
+	if FireAnimEnd > 0 and CurTime() >= FireAnimEnd then
+		self:SetFireAnimEnd(0)
 		if self:GetActivity() == ACT_VM_PRIMARYATTACK then self:SendWeaponAnim(ACT_VM_IDLE) end
 	end
 
 	if self.AimHoldType then
-		local HoldType = self:GetNWBool("iron", false) and self.AimHoldType or self.HoldType
+		local HoldType = self:GetIron() and self.AimHoldType or self.HoldType
 		if self:GetHoldType() ~= HoldType then self:SetHoldType(HoldType) end
-	end
-
-	if SERVER and Owner:IsPlayer() then
-		local ct = CurTime()
-		if ct > (self.NextThinkTime or 0) then
-			local Condition = (Owner:IsOnGround()) and (not Owner:IsSprinting())
-			and Owner:KeyDown(IN_ATTACK2)
-			and (not Owner:KeyDown(IN_USE))
-
-			if self:GetNWBool("iron") ~= Condition then
-				self:SetNWBool("iron", Condition) -- only updates as needed
-
-				if self.CustomAnim then
-					if Condition then
-						self:SendWeaponAnim(self.AimAnim)
-					else
-						self:SendWeaponAnim(self.IdleAnim)
-					end
-				end
-
-				if self.FakeFire then -- bump the accuracy a bit
-					self.LastShot = CurTime() + (self.Primary.Delay / 2)
-					self:SetNWFloat("lastshot", self.LastShot)
-				end
-			end
-
-			self.NextThinkTime = CurTime() + 0.01
-		end
 	end
 end
 
@@ -967,11 +965,10 @@ if CLIENT then
 	end
 
 	-- Spreads the queued view kick over a few frames instead of snapping the camera
-	function SWEP:HandleRecoil()
+	function SWEP:HandleRecoil(Cmd)
 		local Pitch, Yaw = self.PendingPitch or 0, self.PendingYaw or 0
 		if Pitch == 0 and Yaw == 0 then return end
 
-		local Owner = self:GetOwner()
 		local Decay = math.exp(-self.KickSpeed * FrameTime())
 		local DeltaP, DeltaY = Pitch * (1 - Decay), Yaw * (1 - Decay)
 
@@ -982,15 +979,19 @@ if CLIENT then
 			self.PendingPitch, self.PendingYaw = Pitch - DeltaP, Yaw - DeltaY
 		end
 
-		local Ang = Owner:EyeAngles()
+		local Ang = Cmd:GetViewAngles()
 		Ang.p = Ang.p + DeltaP
 		Ang.y = Ang.y + DeltaY
-		Owner:SetEyeAngles(Ang)
+		Cmd:SetViewAngles(Ang)
 	end
 
-	function SWEP:DrawHUDBackground()
-		self:HandleRecoil()
-	end
+	-- Once a frame, even with the HUD hidden, and the kick goes into the command the server gets
+	hook.Add("CreateMove", "ACF SWEPs Recoil", function(Cmd)
+		local Weapon = LocalPlayer():GetActiveWeapon()
+		if not IsValid(Weapon) or not Weapon.HandleRecoil then return end
+
+		Weapon:HandleRecoil(Cmd)
+	end)
 
 	function SWEP:PlaceWorldModel()
 		if not self.CustomWorldModelPos then return end
@@ -1018,19 +1019,12 @@ if CLIENT then
 		self:SetColor(TracerCol)
 	end
 
-	-- Same condition the server uses for "iron", read from local input so the sights respond without waiting on the network
-	function SWEP:IsAiming()
-		local Owner = self:GetOwner()
-
-		return Owner:IsOnGround() and not Owner:IsSprinting() and Owner:KeyDown(IN_ATTACK2) and not Owner:KeyDown(IN_USE)
-	end
-
 	function SWEP:TranslateFOV(FOV)
 		local Owner = self:GetOwner()
 		local SelfTbl = self:GetTable()
 		local Delta = math.Clamp(RealTime() - SelfTbl.RateTime, 0, 0.1)
 
-		local InIrons = self:IsAiming() and not SelfTbl.Reloading and not self:IsScopeBlinking()
+		local InIrons = self:IsAiming() and not self:GetReloading() and not self:IsScopeBlinking()
 
 		local Sprinting = Owner:IsSprinting() and (Owner:GetAbsVelocity():LengthSqr() > 10000)
 		local SprintScale = math.Approach(SelfTbl.SprintScale, Sprinting and 1 or 0, Delta * 7)
@@ -1063,7 +1057,7 @@ if CLIENT then
 		local IronPos = self.IronSightPos
 		local IronAng = self.IronSightAng
 
-		local AimSetting = self:GetAimSetting()
+		local AimSetting = self:GetAimSettingData()
 		if AimSetting then
 			IronPos = AimSetting.IronPos
 			IronAng = AimSetting.IronAng
@@ -1388,7 +1382,7 @@ if CLIENT then
 		end
 
 		if SelfTbl.FiremodeSetting ~= 1 then
-			draw.SimpleTextOutlined(FireModeAlias[self:GetNWInt("firemode", 1)], "SWEP-HUD-FONT", SX - 16, SY - 4, White, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Black)
+			draw.SimpleTextOutlined(FireModeAlias[self:GetFireMode()], "SWEP-HUD-FONT", SX - 16, SY - 4, White, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Black)
 		end
 
 		draw.SimpleTextOutlined("AMMO TYPE: " .. SelfTbl.Primary.Ammo, "SWEP-HUD-FONT", SX - 40 + (SelfTbl.FiremodeSetting == 1 and 20 or 0), SY - 4, White, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Black)

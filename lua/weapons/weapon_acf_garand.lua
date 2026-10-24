@@ -55,5 +55,5 @@ SWEP:SetupACFBullet()
 local Ping = Sound("Weapon_Garand.ClipDing")
 
 function SWEP:OnShotFired()
-	if self:Clip1() == 0 then self:EmitSound(Ping) end
+	if self:Clip1() == 0 then self:EmitPredictedSound(Ping) end
 end
