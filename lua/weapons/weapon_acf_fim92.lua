@@ -19,8 +19,8 @@ SWEP.ShotSound				= Sound("Weapon_FIM92.Shoot")
 SWEP.WorldModel             = "models/weapons/fim92/w_fim92.mdl"
 SWEP.HoldType               = "rpg"
 SWEP.CustomWorldModelPos	= true -- Its weapon_bone doesn't bonemerge onto GMod playermodels
-SWEP.OffsetWorldModelPos	= Vector(0, 0, -4)
-SWEP.OffsetWorldModelAng	= Angle(10, 0, 180)
+SWEP.OffsetWorldModelPos	= Vector(0, 0, -2) -- Lined up with the HL2 RPG on the shoulder
+SWEP.OffsetWorldModelAng	= Angle(14, 0, 180)
 
 SWEP.Slot                   = 4
 SWEP.SlotPos                = 0
@@ -55,7 +55,9 @@ SWEP.Tracer                 = 0
 -- Passed to Missiles.CreateSpec
 SWEP.Missile				= "FIM-92"
 SWEP.MissileAmmo			= "ACF.Ammunition.HE"
-SWEP.MissileAmmoData		= {FillerRatio = 1} -- Same as the ammo menu sliders, the filler is empty without this
+-- Same as the ammo menu sliders, the filler is empty without FillerRatio
+-- Half the propellant (40 of 80), the full load flies too fast
+SWEP.MissileAmmoData		= {FillerRatio = 1, RoundLength = 100, PropRatio = 0.4}
 SWEP.MissileGuidance		= "ACF.Missiles.Guidance.Infrared"
 -- Inches, the fuze is only checked once a tick and the missile covers ~420 units in one, so less than ~250 can fly past without going off
 -- The warhead's blast reaches ~390
@@ -65,6 +67,7 @@ SWEP.MissileFuze			= {Type = "ACF.Missiles.Fuze.Radio", Data = {FuzeDistance = 3
 SWEP.LockTime				= 2
 SWEP.SeekInterval			= 0.1
 SWEP.LockPitch				= 170 -- Pitch of the growl once locked
+SWEP.NoLockSound			= Sound("buttons/button10.wav") -- Pulling the trigger without a lock
 
 SWEP.IronSightPos			= Vector(-1, -12, -0.5)
 SWEP.IdlePos				= Vector(3, 5, -1.5)
@@ -80,6 +83,7 @@ SWEP.Zoom					= 1.5
 SWEP.Recovery				= 0.5
 
 SWEP.RequiresAim			= true
+SWEP.AimSpeedMul			= 0.7 -- On top of CarrySpeedMul while aimed, see the SetupMove hook
 SWEP.AimHoldType			= "rpg"
 SWEP.PunchAmount			= 0.5
 
@@ -117,7 +121,27 @@ function SWEP:SetupDataTables()
 	self:NetworkVar("Entity", 0, "SeekTarget")
 	self:NetworkVar("Vector", 0, "SeekPos")
 	self:NetworkVar("Float", 5, "SeekStart") -- When the seeker first saw the current target, 0 means it sees nothing
+	self:NetworkVar("Float", 6, "NoLockTime") -- When the trigger was last pulled without a lock, for the HUD warning
 end
+
+-- Only fires once the seeker has locked on
+function SWEP:CanFireNow()
+	if not BaseClass.CanFireNow(self) then return false end
+	if self:IsLocked() then return true end
+
+	self:SetNoLockTime(CurTime())
+	self:EmitPredictedSound(self.NoLockSound)
+
+	return false
+end
+
+-- The shooter slows down while aiming the launcher
+hook.Add("SetupMove", "ACF SWEPs FIM-92 Aim Speed", function(Ply, Move)
+	local Weapon = Ply:GetActiveWeapon()
+	if not (IsValid(Weapon) and Weapon.AimSpeedMul and Weapon:GetIron()) then return end
+
+	Move:SetMaxClientSpeed(Move:GetMaxClientSpeed() * Weapon.AimSpeedMul)
+end)
 
 function SWEP:IsSeeking()
 	return self:GetSeekStart() > 0
@@ -219,6 +243,12 @@ if CLIENT then
 
 	function SWEP:DrawHUD()
 		BaseClass.DrawHUD(self)
+
+		-- Flashes for a second after trying to fire without a lock
+		local NoLock = CurTime() - self:GetNoLockTime()
+		if NoLock < 1 and NoLock % 0.25 < 0.125 then
+			draw.SimpleTextOutlined("NO LOCK", "SWEP-HUD-FONT", ScrW() * 0.5, ScrH() * 0.5 + 48 * Scale, LockColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, Black)
+		end
 
 		if not self:IsSeeking() then return end
 

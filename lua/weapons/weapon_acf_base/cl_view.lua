@@ -43,6 +43,8 @@ function SWEP:PlaceWorldModel()
 	if not self.CustomWorldModelPos then return end
 	local owner = self:GetOwner()
 	if not IsValid(owner) then return end
+	-- The local player's weapon can draw before its owner's bones are set up for the frame, reading last frame's hand
+	owner:SetupBones()
 	local bone = owner:LookupBone("ValveBiped.Bip01_R_Hand")
 	if not bone then return end
 	local vmat = owner:GetBoneMatrix(bone)
@@ -52,6 +54,7 @@ function SWEP:PlaceWorldModel()
 
 	self:SetPos(Pos)
 	self:SetAngles(Ang)
+	self:InvalidateBoneCache()
 	self:SetupBones()
 end
 
