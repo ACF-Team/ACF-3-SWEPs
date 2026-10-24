@@ -55,7 +55,9 @@ SWEP.Tracer                 = 0
 -- Passed to Missiles.CreateSpec
 SWEP.Missile				= "FIM-92"
 SWEP.MissileAmmo			= "ACF.Ammunition.HE"
-SWEP.MissileAmmoData		= {FillerRatio = 1, RoundLength = 75, PropRatio = 0.2}
+-- Same as the ammo menu sliders, the filler is empty without FillerRatio
+-- Half the propellant (40 of 80), the full load flies too fast
+SWEP.MissileAmmoData		= {FillerRatio = 1, RoundLength = 100, PropRatio = 0.4}
 SWEP.MissileGuidance		= "ACF.Missiles.Guidance.Infrared"
 -- Inches, the fuze is only checked once a tick and the missile covers ~420 units in one, so less than ~250 can fly past without going off
 -- The warhead's blast reaches ~390
