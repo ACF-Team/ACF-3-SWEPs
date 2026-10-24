@@ -125,12 +125,18 @@ if CLIENT then
 		"models/weapons/v_models/springfield/v_springfield",
 	}
 
-	for _, Path in ipairs(Chromed) do
-		local Mat = Material(Path)
+	local function FixChrome()
+		for _, Path in ipairs(Chromed) do
+			local Mat = Material(Path)
 
-		Mat:SetUndefined("$envmap")
-		Mat:Recompute()
+			Mat:SetUndefined("$envmap")
+			Mat:Recompute()
+		end
 	end
+
+	-- Autorun is before the map loads, and loading it reloads these materials, so it's done again afterwards
+	FixChrome()
+	hook.Add("InitPostEntity", "ACF SWEPs Fix Chrome", FixChrome)
 end
 
 if SERVER then
