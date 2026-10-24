@@ -391,6 +391,7 @@ function SWEP:Think()
 
 	self:SyncAutomatic()
 	self:UpdateReload()
+	self:UpdateAutoReload()
 	self:UpdateIron()
 
 	local FireAnimEnd = self:GetFireAnimEnd()

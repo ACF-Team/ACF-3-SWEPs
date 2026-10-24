@@ -158,6 +158,16 @@ function SWEP:UpdateReload()
 	self:GetReloadType().Finish(self)
 end
 
+-- From SWEP:Think, reloads an empty weapon once the last shot's refire delay is over
+-- Think runs before the engine fills the clip at the end of DefaultReload, so wait for the engine to be done too
+function SWEP:UpdateAutoReload()
+	if self:IsReloadPending() or self:GetInternalVariable("m_bInReload") then return end
+	if self:Clip1() > 0 or self:Ammo1() <= 0 then return end
+	if CurTime() < self:GetNextPrimaryFire() then return end
+
+	self:Reload()
+end
+
 -- Returns true if firing was used up stopping a reload
 function SWEP:InterruptReload()
 	if not self:IsReloadPending() then return false end
