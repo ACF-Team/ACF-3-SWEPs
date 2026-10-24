@@ -1,10 +1,18 @@
 AddCSLuaFile()
 
-if CLIENT then
-	-- This is such a hack...
-	-- I tried using AddContentType but NOTHING wanted to work.
-	-- So screw it, I have to play dirty here to get what I'm trying to achieve.
+local Category = "ACF-3 SWEPs"
+local ContentType = "acf_swep"
 
+-- The spawnmenu list entry is made from the weapon's own table before it inherits from the base, so give it the base's
+hook.Add("PreRegisterSWEP", "ACF SWEPs List Entry", function(SWEP)
+	if SWEP.Base ~= "weapon_acf_base" then return end
+
+	SWEP.Category = SWEP.Category or Category
+	SWEP.ScriptedEntityType = SWEP.ScriptedEntityType or ContentType
+	SWEP.IconOverride = SWEP.IconOverride or "materials/vgui/entities/acf_logo.png"
+end)
+
+if CLIENT then
 	local PANEL = {}
 	function PANEL:OpenForPanel(Panel)
 		local Height = Panel:GetTall() * 0.9
@@ -13,7 +21,7 @@ if CLIENT then
 		self:SetSize(Panel:GetWide() * 2, Height)
 		self:SetDrawOnTop(true)
 
-		self.SWEP = weapons.GetStored(Panel.WeaponClassName)
+		self.SWEP = weapons.Get(Panel:GetSpawnName())
 		self.SWEP:BuildWepSelectionText()
 
 		local Name = self:Add("DLabel")
@@ -45,113 +53,58 @@ if CLIENT then
 	end
 	vgui.Register("ACF3.SWEPs.ViewWeaponInfo", PANEL, "DPanel")
 
-	local Category = "ACF-3 SWEPs"
-	local matOverlay_Normal = Material("gui/ContentIcon-normal.png")
-	local matOverlay_Hovered = Material("gui/ContentIcon-hovered.png")
-
-	-- Annoying how much source code I have to copy from base gmod to pull this off...
-	local shadowColor = Color(0, 0, 0, 200)
-	local function DrawTextShadow(text, x, y)
-		draw.SimpleText(text, "DermaDefault", x + 1, y + 1, shadowColor)
-		draw.SimpleText(text, "DermaDefault", x, y, color_white)
-	end
-	local function DrawWeaponIcon(self, w, h)
-		local SWEP = weapons.GetStored(self.WeaponClassName)
-		local SKIN = self:GetSkin()
-
-		for _ = 1, 2 do
-			SKIN.tex.Shadow(0, 0, w, h)
-		end
-
-		if not IsValid(self.SpawnIcon) then
-			self.SpawnIcon = self:Add("SpawnIcon")
-			self.SpawnIcon:SetModel(SWEP.WorldModel)
-			self.SpawnIcon:SetWide(self:GetWide())
-			self.SpawnIcon:SetTall(self:GetTall())
-			self.SpawnIcon:SetMouseInputEnabled(false) -- fallback to the parent
-			self.SpawnIcon.IsHovered = function() return self:IsHovered() end
-			self.SpawnIcon:SetPaintedManually(true)
-		end
-
-		if self.Depressed and not self.Dragging then
-			if self.Border ~= 8 then
-				self.Border = 8
-				self:OnDepressionChanged(true)
-			end
-		else
-			if self.Border ~= 0 then
-				self.Border = 0
-				self:OnDepressionChanged(false)
-			end
-		end
-
-		self.SpawnIcon:PaintManual()
-
-		surface.SetDrawColor(255, 255, 255, 255)
-
-		local drawText = false
-		if not dragndrop.IsDragging() and (self:IsHovered() or self.Depressed or self:IsChildHovered()) then
-			surface.SetMaterial(matOverlay_Hovered)
-		else
-			surface.SetMaterial(matOverlay_Normal)
-			drawText = true
-		end
-
-		surface.DrawTexturedRect(self.Border, self.Border, w - self.Border * 2, h - self.Border * 2)
-
-		if drawText then
-			local buffere = self.Border + 10
-
-			-- Set up smaller clipping so cut text looks nicer
-			local px, py = self:LocalToScreen(buffere, 0)
-			local pw, ph = self:LocalToScreen(w - buffere, h)
-			render.SetScissorRect(px, py, pw, ph, true)
-
-			-- Calculate X pos
-			surface.SetFont("DermaDefault")
-			local tW, tH = surface.GetTextSize(self.m_NiceName)
-
-			local x = w / 2 - tW / 2
-			if tW > (w - buffere * 2) then
-				local mx, _ = self:ScreenToLocal(input.GetCursorPos())
-				local diff = tW - w + buffere * 2
-
-				x = buffere + math.Remap(math.Clamp(mx, 0, w), 0, w, 0, -diff)
-			end
-
-			-- Draw
-			DrawTextShadow(self.m_NiceName, x, h - tH - 9)
-			render.SetScissorRect(0, 0, 0, 0, false)
-		end
+	-- ContentIcon:Paint draws its Image with PaintAt, this lets a spawnicon stand in for it
+	local function PaintSpawnIconAt(self, X, Y, W, H)
+		self:SetPos(X, Y)
+		self:SetSize(W, H)
+		self:PaintManual()
 	end
 
-	local function CreateWeaponIcon(Weapon, PropPanel)
-		local WeaponIcon = spawnmenu.CreateContentIcon(Weapon.ScriptedEntityType or "weapon", PropPanel, {
-			nicename	= Weapon.PrintName or Weapon.ClassName,
-			spawnname	= Weapon.ClassName,
-			material	= Weapon.IconOverride or ("entities/" .. Weapon.ClassName .. ".png"),
-			admin		= Weapon.AdminOnly
-		})
+	-- Sandbox's weapon icon with the weapon's model as a spawnicon instead of an image, and our info panel as the tooltip
+	spawnmenu.AddContentType(ContentType, function(Container, Obj)
+		local Icon = spawnmenu.GetContentType("weapon")(Container, Obj)
+		if not IsValid(Icon) then return end
 
-		if Weapon.Category == Category then
-			WeaponIcon.WeaponClassName = Weapon.ClassName
-			WeaponIcon:SetTooltipDelay(0)
-			WeaponIcon:SetTooltipPanelOverride("ACF3.SWEPs.ViewWeaponInfo")
-			function WeaponIcon:Paint(w, h)
-				DrawWeaponIcon(self, w, h)
-			end
-			local Think = WeaponIcon.Think
-			function WeaponIcon:Think()
-				if Think then Think(self) end
-				if IsValid(self.SpawnIcon) then
-					self.SpawnIcon:SetPos(3 + self.Border, 3 + self.Border)
-					self.SpawnIcon:SetSize(128 - 8 - self.Border * 2, 128 - 8 - self.Border * 2)
-				end
-			end
+		Icon:SetContentType(ContentType)
+		Icon:SetTooltipDelay(0)
+		Icon:SetTooltipPanelOverride("ACF3.SWEPs.ViewWeaponInfo")
+
+		local SWEP = weapons.Get(Obj.spawnname)
+		if SWEP and SWEP.WorldModel ~= "" then
+			local SpawnIcon = Icon:Add("SpawnIcon")
+			SpawnIcon:SetModel(SWEP.WorldModel)
+			SpawnIcon:SetMouseInputEnabled(false) -- fallback to the parent
+			SpawnIcon:SetPaintedManually(true)
+			SpawnIcon.IsHovered = function() return Icon:IsHovered() end
+			SpawnIcon.PaintAt = PaintSpawnIconAt
+
+			Icon.Image:Remove()
+			Icon.Image = SpawnIcon
 		end
 
-		return WeaponIcon
-	end
+		local BasePaint = Icon.Paint
+		function Icon:Paint(W, H)
+			local SKIN = self:GetSkin()
+
+			for _ = 1, 2 do
+				SKIN.tex.Shadow(0, 0, W, H)
+			end
+
+			BasePaint(self, W, H)
+		end
+
+		-- Dragging the icon into a spawnlist copies it, keep the copy one of ours
+		function Icon:Copy()
+			return spawnmenu.CreateContentIcon(ContentType, self:GetParent(), {
+				nicename = self.m_NiceName,
+				spawnname = self:GetSpawnName(),
+				material = self.m_MaterialName,
+				admin = self:GetAdminOnly(),
+			})
+		end
+
+		return Icon
+	end)
 
 	list.Set("ContentCategoryIcons", Category, "vgui/entities/acf_logo.png")
 
@@ -161,19 +114,6 @@ if CLIENT then
 		if not IsValid(Gun) or not Gun:IsWeapon() or not Gun.BulletModel then return end
 
 		Effect:SetModelScale(Gun.BulletScale or 1, 0)
-	end)
-
-	timer.Simple(0, function()
-		-- TODO: Remove after the update
-		if VERSION < 260901 then return end
-
-		hook.Add("PopulateWeapons", "AddWeaponContent", function(Content, Tree)
-			Content:PopulateFromList("Weapon", Tree, {
-				SortName = "PrintName",
-				CategoryIcon = "icon16/gun.png",
-				CreateIconFunc = CreateWeaponIcon
-			})
-		end)
 	end)
 end
 
@@ -185,138 +125,155 @@ if SERVER then
 	end)
 end
 
--- i'd joke about there being pain involved in making this, but in reality i made a script to do this for me
 do
-	local pt = {98, 102}
+	-- {name, sound, settings}, settings left out are CHAN_ITEM at full volume, level 75 and pitch 100
+	local Shot = {channel = CHAN_WEAPON, level = 150, pitch = {98, 102}}
+	local Draw = {channel = CHAN_BODY}
+	local WorldReload = {volume = 0.76953125, level = 65}
 
-	sound.Add({name = "Weapon_30cal.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^30cal/30cal_shoot.wav"})
-	sound.Add({name = "Weapon_30cal.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "30cal/30cal_boltback.wav"})
-	sound.Add({name = "Weapon_30cal.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "30cal/30cal_boltforward.wav"})
-	sound.Add({name = "Weapon_30cal.BulletChain1", channel = 3, volume = 1, level = 75, pitch = 100, sound = "30cal/30cal_bulletchain1.wav"})
-	sound.Add({name = "Weapon_30cal.BulletChain2", channel = 3, volume = 1, level = 75, pitch = 100, sound = "30cal/30cal_bulletchain2.wav"})
-	sound.Add({name = "Weapon_30cal.CoverUp", channel = 3, volume = 1, level = 75, pitch = 100, sound = "30cal/30cal_coverup.wav"})
-	sound.Add({name = "Weapon_30cal.CoverDown", channel = 1, volume = 1, level = 75, pitch = 100, sound = "30cal/30cal_coverdown.wav"})
-	sound.Add({name = "Weapon_30cal.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_30cal.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "30cal/30cal_worldreload.wav"})
+	local Sounds = {
+		{"Weapon_30cal.Shoot", "^30cal/30cal_shoot.wav", Shot},
+		{"Weapon_30cal.BoltBack", "30cal/30cal_boltback.wav"},
+		{"Weapon_30cal.BoltForward", "30cal/30cal_boltforward.wav"},
+		{"Weapon_30cal.BulletChain1", "30cal/30cal_bulletchain1.wav"},
+		{"Weapon_30cal.BulletChain2", "30cal/30cal_bulletchain2.wav"},
+		{"Weapon_30cal.CoverUp", "30cal/30cal_coverup.wav"},
+		{"Weapon_30cal.CoverDown", "30cal/30cal_coverdown.wav", {channel = CHAN_WEAPON}},
+		{"Weapon_30cal.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_30cal.WorldReload", "30cal/30cal_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Bar.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^bar/bar_shoot.wav"})
-	sound.Add({name = "Weapon_Bar.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "bar/bar_boltback.wav"})
-	sound.Add({name = "Weapon_Bar.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "bar/bar_boltforward.wav"})
-	sound.Add({name = "Weapon_Bar.ClipIn1", channel = 3, volume = 1, level = 75, pitch = 100, sound = "bar/bar_clipin1.wav"})
-	sound.Add({name = "Weapon_Bar.ClipIn2", channel = 3, volume = 1, level = 75, pitch = 100, sound = "bar/bar_clipin2.wav"})
-	sound.Add({name = "Weapon_Bar.ClipOut", channel = 3, volume = 1, level = 75, pitch = 100, sound = "bar/bar_clipout.wav"})
-	sound.Add({name = "Weapon_Bar.SelectorSwitch", channel = 3, volume = 1, level = 75, pitch = 100, sound = "bar/bar_selectorswitch.wav"})
-	sound.Add({name = "Weapon_Bar.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Bar.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "bar/bar_worldreload.wav"})
+		{"Weapon_Bar.Shoot", "^bar/bar_shoot.wav", Shot},
+		{"Weapon_Bar.BoltBack", "bar/bar_boltback.wav"},
+		{"Weapon_Bar.BoltForward", "bar/bar_boltforward.wav"},
+		{"Weapon_Bar.ClipIn1", "bar/bar_clipin1.wav"},
+		{"Weapon_Bar.ClipIn2", "bar/bar_clipin2.wav"},
+		{"Weapon_Bar.ClipOut", "bar/bar_clipout.wav"},
+		{"Weapon_Bar.SelectorSwitch", "bar/bar_selectorswitch.wav"},
+		{"Weapon_Bar.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Bar.WorldReload", "bar/bar_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Bazooka.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^bazooka/rocket1.wav"})
-	sound.Add({name = "Weapon_Bazooka.ClipIn", channel = 3, volume = 1, level = 75, pitch = 100, sound = "bazooka/rocket_clipin.wav"})
-	sound.Add({name = "Weapon_Bazooka.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Bazooka.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "bazooka/rocket_worldreload.wav"})
+		{"Weapon_Bazooka.Shoot", "^bazooka/rocket1.wav", Shot},
+		{"Weapon_Bazooka.ClipIn", "bazooka/rocket_clipin.wav"},
+		{"Weapon_Bazooka.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Bazooka.WorldReload", "bazooka/rocket_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Carbine.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^m1carbine/m1carbine_shoot.wav"})
-	sound.Add({name = "Weapon_Carbine.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "m1carbine/m1carbine_boltback.wav"})
-	sound.Add({name = "Weapon_Carbine.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "m1carbine/m1carbine_boltforward.wav"})
-	sound.Add({name = "Weapon_Carbine.ClipIn1", channel = 3, volume = 1, level = 75, pitch = 100, sound = "m1carbine/m1carbine_clipin1.wav"})
-	sound.Add({name = "Weapon_Carbine.ClipIn2", channel = 3, volume = 1, level = 75, pitch = 100, sound = "m1carbine/m1carbine_clipin2.wav"})
-	sound.Add({name = "Weapon_Carbine.ClipOut", channel = 3, volume = 1, level = 75, pitch = 100, sound = "m1carbine/m1carbine_clipout.wav"})
-	sound.Add({name = "Weapon_Carbine.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Carbine.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "m1carbine/m1carbine_worldreload.wav"})
+		{"Weapon_Carbine.Shoot", "^m1carbine/m1carbine_shoot.wav", Shot},
+		{"Weapon_Carbine.BoltBack", "m1carbine/m1carbine_boltback.wav"},
+		{"Weapon_Carbine.BoltForward", "m1carbine/m1carbine_boltforward.wav"},
+		{"Weapon_Carbine.ClipIn1", "m1carbine/m1carbine_clipin1.wav"},
+		{"Weapon_Carbine.ClipIn2", "m1carbine/m1carbine_clipin2.wav"},
+		{"Weapon_Carbine.ClipOut", "m1carbine/m1carbine_clipout.wav"},
+		{"Weapon_Carbine.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Carbine.WorldReload", "m1carbine/m1carbine_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Colt.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^colt/colt_shoot.wav"})
-	sound.Add({name = "Weapon_Colt.ClipOut", channel = 3, volume = 1, level = 75, pitch = 100, sound = "colt/colt_clipout.wav"})
-	sound.Add({name = "Weapon_Colt.ClipIn", channel = 3, volume = 1, level = 75, pitch = 100, sound = "colt/colt_clipin.wav"})
-	sound.Add({name = "Weapon_Colt.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "colt/colt_boltback.wav"})
-	sound.Add({name = "Weapon_Colt.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "colt/colt_boltforward.wav"})
-	sound.Add({name = "Weapon_Colt.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_pistol.wav"})
-	sound.Add({name = "Weapon_Colt.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "colt/colt_worldreload.wav"})
+		{"Weapon_Colt.Shoot", "^colt/colt_shoot.wav", Shot},
+		{"Weapon_Colt.ClipOut", "colt/colt_clipout.wav"},
+		{"Weapon_Colt.ClipIn", "colt/colt_clipin.wav"},
+		{"Weapon_Colt.BoltBack", "colt/colt_boltback.wav"},
+		{"Weapon_Colt.BoltForward", "colt/colt_boltforward.wav"},
+		{"Weapon_Colt.Draw", "general/draw_pistol.wav", Draw},
+		{"Weapon_Colt.WorldReload", "colt/colt_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_C96.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^c96/c96_shoot.wav"})
-	sound.Add({name = "Weapon_C96.ClipOut", channel = 3, volume = 1, level = 75, pitch = 100, sound = "c96/c96_clipout.wav"})
-	sound.Add({name = "Weapon_C96.ClipIn1", channel = 3, volume = 1, level = 75, pitch = 100, sound = "c96/c96_clipin1.wav"})
-	sound.Add({name = "Weapon_C96.ClipIn2", channel = 3, volume = 1, level = 75, pitch = 100, sound = "c96/c96_clipin2.wav"})
-	sound.Add({name = "Weapon_C96.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "c96/c96_boltback.wav"})
-	sound.Add({name = "Weapon_C96.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "c96/c96_boltforward.wav"})
-	sound.Add({name = "Weapon_C96.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_pistol.wav"})
-	sound.Add({name = "Weapon_C96.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "c96/c96_worldreload.wav"})
+		{"Weapon_C96.Shoot", "^c96/c96_shoot.wav", Shot},
+		{"Weapon_C96.ClipOut", "c96/c96_clipout.wav"},
+		{"Weapon_C96.ClipIn1", "c96/c96_clipin1.wav"},
+		{"Weapon_C96.ClipIn2", "c96/c96_clipin2.wav"},
+		{"Weapon_C96.BoltBack", "c96/c96_boltback.wav"},
+		{"Weapon_C96.BoltForward", "c96/c96_boltforward.wav"},
+		{"Weapon_C96.Draw", "general/draw_pistol.wav", Draw},
+		{"Weapon_C96.WorldReload", "c96/c96_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Garand.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^garand/garand_shoot.wav"})
-	sound.Add({name = "Weapon_Garand.ClipIn1", channel = 3, volume = 1, level = 75, pitch = 100, sound = "garand/garand_clipin1.wav"})
-	sound.Add({name = "Weapon_Garand.ClipIn2", channel = 3, volume = 1, level = 75, pitch = 100, sound = "garand/garand_clipin2.wav"})
-	sound.Add({name = "Weapon_Garand.ClipDing", channel = 6, volume = 1, level = 75, pitch = 100, sound = "garand/garand_clipding.wav"})
-	sound.Add({name = "Weapon_Garand.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "garand/garand_boltforward.wav"})
-	sound.Add({name = "Weapon_Garand.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Garand.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "garand/garand_worldreload.wav"})
+		{"Weapon_Garand.Shoot", "^garand/garand_shoot.wav", Shot},
+		{"Weapon_Garand.ClipIn1", "garand/garand_clipin1.wav"},
+		{"Weapon_Garand.ClipIn2", "garand/garand_clipin2.wav"},
+		{"Weapon_Garand.ClipDing", "garand/garand_clipding.wav", {channel = CHAN_STATIC}},
+		{"Weapon_Garand.BoltForward", "garand/garand_boltforward.wav"},
+		{"Weapon_Garand.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Garand.WorldReload", "garand/garand_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Kar.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^k98/k98_shoot.wav"})
-	sound.Add({name = "Weapon_KarScoped.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^k98/k98scoped_shoot.wav"})
-	sound.Add({name = "Weapon_K98.BoltBack1", channel = 3, volume = 1, level = 75, pitch = 100, sound = "k98/k98_boltback1.wav"})
-	sound.Add({name = "Weapon_K98.BoltBack2", channel = 3, volume = 1, level = 75, pitch = 100, sound = "k98/k98_boltback2.wav"})
-	sound.Add({name = "Weapon_K98.BoltForward1", channel = 3, volume = 1, level = 75, pitch = 100, sound = "k98/k98_boltforward1.wav"})
-	sound.Add({name = "Weapon_K98.BoltForward2", channel = 3, volume = 1, level = 75, pitch = 100, sound = "k98/k98_boltforward2.wav"})
-	sound.Add({name = "Weapon_K98.ClipIn", channel = 3, volume = 1, level = 75, pitch = 100, sound = "k98/k98_clipin.wav"})
-	sound.Add({name = "Weapon_K98.ClipIn2", channel = 3, volume = 0.5, level = 75, pitch = 100, sound = "k98/k98_clipin2.wav"})
-	sound.Add({name = "Weapon_K98.ClipOut", channel = 6, volume = 1, level = 75, pitch = 100, sound = "k98/k98_clipout.wav"})
-	sound.Add({name = "Weapon_K98.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_K98.SingleShotReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "k98/k98_singleshotreload.wav"})
-	sound.Add({name = "Weapon_K98.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "k98/k98_worldreload.wav"})
+		{"Weapon_Kar.Shoot", "^k98/k98_shoot.wav", Shot},
+		{"Weapon_KarScoped.Shoot", "^k98/k98scoped_shoot.wav", Shot},
+		{"Weapon_K98.BoltBack1", "k98/k98_boltback1.wav"},
+		{"Weapon_K98.BoltBack2", "k98/k98_boltback2.wav"},
+		{"Weapon_K98.BoltForward1", "k98/k98_boltforward1.wav"},
+		{"Weapon_K98.BoltForward2", "k98/k98_boltforward2.wav"},
+		{"Weapon_K98.ClipIn", "k98/k98_clipin.wav"},
+		{"Weapon_K98.ClipIn2", "k98/k98_clipin2.wav", {volume = 0.5}},
+		{"Weapon_K98.ClipOut", "k98/k98_clipout.wav", {channel = CHAN_STATIC}},
+		{"Weapon_K98.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_K98.SingleShotReload", "k98/k98_singleshotreload.wav", WorldReload},
+		{"Weapon_K98.WorldReload", "k98/k98_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Luger.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^p38/p38_shoot.wav"})
-	sound.Add({name = "Weapon_Luger.ClipIn", channel = 3, volume = 1, level = 75, pitch = 100, sound = "p38/p38_clipin.wav"})
-	sound.Add({name = "Weapon_Luger.ClipOut", channel = 3, volume = 1, level = 75, pitch = 100, sound = "p38/p38_clipout.wav"})
-	sound.Add({name = "Weapon_Luger.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "p38/p38_boltback.wav"})
-	sound.Add({name = "Weapon_Luger.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "p38/p38_boltforward.wav"})
-	sound.Add({name = "Weapon_Luger.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_pistol.wav"})
-	sound.Add({name = "Weapon_Luger.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "p38/p38_worldreload.wav"})
+		{"Weapon_Luger.Shoot", "^p38/p38_shoot.wav", Shot},
+		{"Weapon_Luger.ClipIn", "p38/p38_clipin.wav"},
+		{"Weapon_Luger.ClipOut", "p38/p38_clipout.wav"},
+		{"Weapon_Luger.BoltBack", "p38/p38_boltback.wav"},
+		{"Weapon_Luger.BoltForward", "p38/p38_boltforward.wav"},
+		{"Weapon_Luger.Draw", "general/draw_pistol.wav", Draw},
+		{"Weapon_Luger.WorldReload", "p38/p38_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Mg42.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^mg42/mg42_shoot.wav"})
-	sound.Add({name = "Weapon_Mg42.OverHeat", channel = 6, volume = 1, level = 75, pitch = 100, sound = "mg42/mg42_overheat.wav"})
-	sound.Add({name = "Weapon_Mg42.CoverUp", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mg42/mg42_coverup.wav"})
-	sound.Add({name = "Weapon_Mg42.CoverDown", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mg42/mg42_coverdown.wav"})
-	sound.Add({name = "Weapon_Mg42.BulletChain1", channel = 6, volume = 1, level = 75, pitch = 100, sound = "mg42/mg42_bulletchain1.wav"})
-	sound.Add({name = "Weapon_Mg42.BulletChain2", channel = 6, volume = 1, level = 75, pitch = 100, sound = "mg42/mg42_bulletchain2.wav"})
-	sound.Add({name = "Weapon_Mg42.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mg42/mg42_boltback.wav"})
-	sound.Add({name = "Weapon_Mg42.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mg42/mg42_boltforward.wav"})
-	sound.Add({name = "Weapon_Mg42.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Mg42.DeployBipod", channel = 1, volume = 1, level = 75, pitch = 100, sound = "mg42/mg42_deploybipod.wav"})
-	sound.Add({name = "Weapon_Mg42.RaiseBipod", channel = 1, volume = 1, level = 75, pitch = 100, sound = "mg42/mg42_raisebipod.wav"})
-	sound.Add({name = "Weapon_Mg42.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "mg42/mg42_worldreload.wav"})
+		{"Weapon_Mg42.Shoot", "^mg42/mg42_shoot.wav", Shot},
+		{"Weapon_Mg42.OverHeat", "mg42/mg42_overheat.wav", {channel = CHAN_STATIC}},
+		{"Weapon_Mg42.CoverUp", "mg42/mg42_coverup.wav"},
+		{"Weapon_Mg42.CoverDown", "mg42/mg42_coverdown.wav"},
+		{"Weapon_Mg42.BulletChain1", "mg42/mg42_bulletchain1.wav", {channel = CHAN_STATIC}},
+		{"Weapon_Mg42.BulletChain2", "mg42/mg42_bulletchain2.wav", {channel = CHAN_STATIC}},
+		{"Weapon_Mg42.BoltBack", "mg42/mg42_boltback.wav"},
+		{"Weapon_Mg42.BoltForward", "mg42/mg42_boltforward.wav"},
+		{"Weapon_Mg42.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Mg42.DeployBipod", "mg42/mg42_deploybipod.wav", {channel = CHAN_WEAPON}},
+		{"Weapon_Mg42.RaiseBipod", "mg42/mg42_raisebipod.wav", {channel = CHAN_WEAPON}},
+		{"Weapon_Mg42.WorldReload", "mg42/mg42_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Mp40.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^mp40/mp40_shoot.wav"})
-	sound.Add({name = "Weapon_Mp40.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Mp40.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp40/mp40_boltback.wav"})
-	sound.Add({name = "Weapon_Mp40.ClipIn", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp40/mp40_clipin.wav"})
-	sound.Add({name = "Weapon_Mp40.ClipOut", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp40/mp40_clipout.wav"})
-	sound.Add({name = "Weapon_Mp40.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp40/mp40_boltforward.wav"})
-	sound.Add({name = "Weapon_Mp40.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "mp40/mp40_worldreload.wav"})
+		{"Weapon_Mp40.Shoot", "^mp40/mp40_shoot.wav", Shot},
+		{"Weapon_Mp40.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Mp40.BoltBack", "mp40/mp40_boltback.wav"},
+		{"Weapon_Mp40.ClipIn", "mp40/mp40_clipin.wav"},
+		{"Weapon_Mp40.ClipOut", "mp40/mp40_clipout.wav"},
+		{"Weapon_Mp40.BoltForward", "mp40/mp40_boltforward.wav"},
+		{"Weapon_Mp40.WorldReload", "mp40/mp40_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Mp44.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^mp44/mp44_shoot.wav"})
-	sound.Add({name = "Weapon_Mp44.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp44/mp44_boltback.wav"})
-	sound.Add({name = "Weapon_Mp44.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp44/mp44_boltforward.wav"})
-	sound.Add({name = "Weapon_Mp44.ClipIn1", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp44/mp44_clipin1.wav"})
-	sound.Add({name = "Weapon_Mp44.ClipIn2", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp44/mp44_clipin2.wav"})
-	sound.Add({name = "Weapon_Mp44.ClipOut", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp44/mp44_clipout.wav"})
-	sound.Add({name = "Weapon_Mp44.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Mp44.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "mp44/mp44_worldreload.wav"})
-	sound.Add({name = "Weapon_Mp44.SelectorSwitch", channel = 3, volume = 1, level = 75, pitch = 100, sound = "mp44/mp44_selectorswitch.wav"})
+		{"Weapon_Mp44.Shoot", "^mp44/mp44_shoot.wav", Shot},
+		{"Weapon_Mp44.BoltBack", "mp44/mp44_boltback.wav"},
+		{"Weapon_Mp44.BoltForward", "mp44/mp44_boltforward.wav"},
+		{"Weapon_Mp44.ClipIn1", "mp44/mp44_clipin1.wav"},
+		{"Weapon_Mp44.ClipIn2", "mp44/mp44_clipin2.wav"},
+		{"Weapon_Mp44.ClipOut", "mp44/mp44_clipout.wav"},
+		{"Weapon_Mp44.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Mp44.WorldReload", "mp44/mp44_worldreload.wav", WorldReload},
+		{"Weapon_Mp44.SelectorSwitch", "mp44/mp44_selectorswitch.wav"},
 
-	sound.Add({name = "Weapon_Panzerschreck.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^bazooka/rocket1.wav"})
-	sound.Add({name = "Weapon_Panzerschreck.ClipIn", channel = 3, volume = 1, level = 75, pitch = 100, sound = "bazooka/rocket_clipin.wav"})
-	sound.Add({name = "Weapon_Panzerschreck.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Panzerschreck.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "bazooka/rocket_worldreload.wav"})
+		{"Weapon_Panzerschreck.Shoot", "^bazooka/rocket1.wav", Shot},
+		{"Weapon_Panzerschreck.ClipIn", "bazooka/rocket_clipin.wav"},
+		{"Weapon_Panzerschreck.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Panzerschreck.WorldReload", "bazooka/rocket_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Springfield.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^springfield/spring_shoot.wav"})
-	sound.Add({name = "Weapon_Springfield.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Springfield.SingleShotReload", channel = 3, volume = 0.76953125, level = 75, pitch = 100, sound = "k98/k98_singleshotreload.wav"})
-	sound.Add({name = "Weapon_Springfield.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "k98/k98_worldreload.wav"})
+		{"Weapon_Springfield.Shoot", "^springfield/spring_shoot.wav", Shot},
+		{"Weapon_Springfield.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Springfield.SingleShotReload", "k98/k98_singleshotreload.wav", {volume = 0.76953125}},
+		{"Weapon_Springfield.WorldReload", "k98/k98_worldreload.wav", WorldReload},
 
-	sound.Add({name = "Weapon_Thompson.Shoot", channel = 1, volume = 1, level = 150, pitch = pt, sound = "^thompson/thompson_shoot.wav"})
-	sound.Add({name = "Weapon_Thompson.ClipIn", channel = 3, volume = 1, level = 75, pitch = 100, sound = "thompson/thompson_clipin.wav"})
-	sound.Add({name = "Weapon_Thompson.ClipOut", channel = 3, volume = 1, level = 75, pitch = 100, sound = "thompson/thompson_clipout.wav"})
-	sound.Add({name = "Weapon_Thompson.BoltBack", channel = 3, volume = 1, level = 75, pitch = 100, sound = "thompson/thompson_boltback.wav"})
-	sound.Add({name = "Weapon_Thompson.BoltForward", channel = 3, volume = 1, level = 75, pitch = 100, sound = "thompson/thompson_boltforward.wav"})
-	sound.Add({name = "Weapon_Thompson.Draw", channel = 4, volume = 1, level = 75, pitch = 100, sound = "general/draw_rifle.wav"})
-	sound.Add({name = "Weapon_Thompson.WorldReload", channel = 3, volume = 0.76953125, level = 65, pitch = 100, sound = "thompson/thompson_worldreload.wav"})
+		{"Weapon_Thompson.Shoot", "^thompson/thompson_shoot.wav", Shot},
+		{"Weapon_Thompson.ClipIn", "thompson/thompson_clipin.wav"},
+		{"Weapon_Thompson.ClipOut", "thompson/thompson_clipout.wav"},
+		{"Weapon_Thompson.BoltBack", "thompson/thompson_boltback.wav"},
+		{"Weapon_Thompson.BoltForward", "thompson/thompson_boltforward.wav"},
+		{"Weapon_Thompson.Draw", "general/draw_rifle.wav", Draw},
+		{"Weapon_Thompson.WorldReload", "thompson/thompson_worldreload.wav", WorldReload},
+	}
+
+	for _, Entry in ipairs(Sounds) do
+		local Settings = Entry[3] or {}
+
+		sound.Add({
+			name = Entry[1],
+			sound = Entry[2],
+			channel = Settings.channel or CHAN_ITEM,
+			volume = Settings.volume or 1,
+			level = Settings.level or 75,
+			pitch = Settings.pitch or 100,
+		})
+	end
 end
 
 CreateConVar("acf_sweps_speed_mult", "1", {FCVAR_ARCHIVE, FCVAR_REPLICATED}, "Movespeed modifier for ACF SWEPs (true/false)", 0, 1)
