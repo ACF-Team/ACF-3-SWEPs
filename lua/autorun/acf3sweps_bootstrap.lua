@@ -115,6 +115,22 @@ if CLIENT then
 
 		Effect:SetModelScale(Gun.BulletScale or 1, 0)
 	end)
+
+	-- GMod's fallback DoD:S textures have no alpha, so these masked envmaps make the whole gun chrome
+	local Chromed = {
+		"models/weapons/v_models/30cal/v_30cal",
+		"models/weapons/v_models/c96/v_c96",
+		"models/weapons/v_models/k98_scoped/v_k98_scoped",
+		"models/weapons/v_models/mg42/v_mg42",
+		"models/weapons/v_models/springfield/v_springfield",
+	}
+
+	for _, Path in ipairs(Chromed) do
+		local Mat = Material(Path)
+
+		Mat:SetUndefined("$envmap")
+		Mat:Recompute()
+	end
 end
 
 if SERVER then
