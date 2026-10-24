@@ -139,6 +139,95 @@ function Adapter.FireProjectile(Weapon, Bullet, Pos, Dir, Filter)
 	GetAmmoType(Bullet.Type):Create(Weapon, Bullet)
 end
 
+-- Server only, the missile a launcher fires, from ACF's own missile classes
+-- Params are Missiles.CreateSpec's: {Missile, AmmoType, Ammo, Guidance, Fuze}
+function Adapter.CreateMissileSpec(Params)
+	return ACF.Missiles.CreateSpec(Params)
+end
+
+-- What ACF's missiles ask the thing that fired them, see launcher_sv.lua in ACF
+local WeaponLauncher = {}
+WeaponLauncher.__index = WeaponLauncher
+
+function WeaponLauncher:GetEntity()
+	return self.Weapon
+end
+
+function WeaponLauncher:GetMissileFilter()
+	return self.Filter
+end
+
+-- Server only, how wide the missile's seeker looks in degrees
+function Adapter.GetSeekCone(Spec)
+	return Spec.Class.SeekCone
+end
+
+-- The vehicle or contraption the player is in or standing on, so the seeker doesn't lock onto it
+local function GetOwnContraption(Owner)
+	local Entity = Owner:InVehicle() and Owner:GetVehicle() or Owner:GetGroundEntity()
+	if IsValid(Entity) then return Entity:CFW_GetContraption() end
+end
+
+local SeekerTrace = {start = true, endpos = true, mask = MASK_SOLID_BRUSHONLY}
+local SeekerMinDistance = 38750 -- Squared, ~5 meters, same as ACF's infrared guidance
+
+-- Server only, what an infrared seeker held by Owner sees, like ACF's infrared guidance does
+-- Current keeps its lock as long as it stays in view
+function Adapter.FindSeekerTarget(Owner, Pos, Dir, Cone, Current)
+	local ConeCos = math.cos(math.rad(Cone))
+	local Target, BestDot
+
+	for Entity in pairs(ACF.GetEntitiesInCone(Pos, Dir, Cone, GetOwnContraption(Owner))) do
+		local EntPos = Entity.ACF_Position
+		if not EntPos or Pos:DistToSqr(EntPos) < SeekerMinDistance then continue end
+
+		local Dot = (EntPos - Pos):GetNormalized():Dot(Dir)
+		if Dot < ConeCos then continue end
+
+		SeekerTrace.start = Pos
+		SeekerTrace.endpos = EntPos
+		if ACF.trace(SeekerTrace).Hit then continue end
+
+		if Entity == Current then return Entity end
+
+		if not BestDot or Dot > BestDot then
+			Target, BestDot = Entity, Dot
+		end
+	end
+
+	return Target
+end
+
+-- Server only, the target's position as the seeker sees it
+function Adapter.GetSeekerTargetPos(Target)
+	return Target.ACF_Position or Target:WorldSpaceCenter()
+end
+
+-- Server only, Target is what the seeker locked onto before launch, the missile looks for its own without it
+function Adapter.FireMissile(Weapon, Spec, Pos, Dir, Filter, Target)
+	local Missiles = ACF.Missiles
+	local Owner = Weapon:GetOwner()
+
+	local Missile, Err = Missiles.Create(Spec, {
+		Owner = Owner,
+		Pos = Pos,
+		Ang = Dir:Angle(),
+		Launcher = setmetatable({Weapon = Weapon, Filter = Filter}, WeaponLauncher),
+		Filter = Filter,
+	})
+
+	if not Missile then return nil, Err end
+
+	Missiles.Launch(Missile, {
+		Velocity = Dir * Weapon.ACFMuzzleVel * 39.37 + Owner:GetVelocity(),
+		Direction = Dir,
+	})
+
+	if IsValid(Target) then Missile.GuidanceData.Target = Target end
+
+	return Missile
+end
+
 -- Players and NPCs get hit instantly at close range instead of by a projectile
 function Adapter.IsHybridTarget(Entity)
 	return ACF.Check(Entity) and (Entity:IsPlayer() or Entity:IsNPC())

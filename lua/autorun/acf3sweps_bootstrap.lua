@@ -199,6 +199,9 @@ do
 		{"Weapon_C96.Draw", "general/draw_pistol.wav", Draw},
 		{"Weapon_C96.WorldReload", "c96/c96_worldreload.wav", WorldReload},
 
+		-- SideWinderGrowl.wav by FrazierWing, CC0: https://freesound.org/people/FrazierWing/sounds/569666/
+		{"Weapon_FIM92.Seeker", "weapons/fim92/seeker_growl.wav", {channel = CHAN_STATIC, volume = 0.5, level = 60}},
+
 		{"Weapon_Garand.Shoot", "^garand/garand_shoot.wav", Shot},
 		{"Weapon_Garand.ClipIn1", "garand/garand_clipin1.wav"},
 		{"Weapon_Garand.ClipIn2", "garand/garand_clipin2.wav"},
