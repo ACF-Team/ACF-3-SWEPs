@@ -22,6 +22,13 @@ local function KeyName(Binding)
 end
 
 function SWEP:GetPenetrationText()
+	-- Launchers fire a missile, so its warhead is what penetrates, not the bullet settings
+	local MissilePen = self.Missile and Adapter.GetMissilePenetration(self)
+
+	if MissilePen then
+		return math.Round(MissilePen, 1) .. "mm @ All distances"
+	end
+
 	local Bullet = self:GetBullet()
 
 	if Bullet.Type == "HEAT" then

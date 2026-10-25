@@ -145,6 +145,34 @@ function Adapter.CreateMissileSpec(Params)
 	return ACF.Missiles.CreateSpec(Params)
 end
 
+-- The warhead's penetration, built the way Missiles.CreateSpec builds its round; that is server only and the
+-- spawnmenu tooltip has no weapon entity to ask, so the client rebuilds it. Nil if the missile isn't loaded
+function Adapter.GetMissilePenetration(SWEP)
+	local Classes      = ACF.Classes
+	local MissileClass = Classes.GetSubtypeByName("ACF.Missiles.BaseMissile", SWEP.Missile)
+	local AmmoClass    = Classes.GetSubtypeByName("ACF.Ammunition.BaseAmmo", SWEP.MissileAmmo)
+	if not (MissileClass and MissileClass.Round and AmmoClass) then return end
+
+	local Ammo  = AmmoClass()
+	local Input = SWEP.MissileAmmoData or {}
+
+	Ammo.Weapon = MissileClass()
+
+	for _, Field in ipairs(Classes.GetTypeFields(AmmoClass)) do
+		if Field.Menu and Input[Field.Name] ~= nil then Ammo[Field.Name] = Input[Field.Name] end
+	end
+
+	if not (isnumber(Input.RoundLength) and Input.RoundLength > 0) then
+		Ammo.RoundLength = nil
+		Ammo.Projectile  = MissileClass.Round.ProjLength
+		Ammo.Propellant  = MissileClass.Round.PropLength
+	end
+
+	local Data = SERVER and Ammo:ServerConvert() or Ammo:ClientConvert()
+
+	return Ammo:GetPenetration(Data, Data.Standoff)
+end
+
 -- What ACF's missiles ask the thing that fired them, see launcher_sv.lua in ACF
 local WeaponLauncher = {}
 WeaponLauncher.__index = WeaponLauncher
@@ -219,9 +247,13 @@ function Adapter.FireMissile(Weapon, Spec, Pos, Dir, Filter, Target)
 	if not Missile then return nil, Err end
 
 	Missiles.Launch(Missile, {
-		Velocity = Dir * Weapon.ACFMuzzleVel * 39.37 + Owner:GetVelocity(),
+		-- Missiles.Launch adds the motor's starting boost on top, so rockets whose motor burns out in the tube launch at 0
+		Velocity = Dir * (Weapon.MissileLaunchVel or Weapon.ACFMuzzleVel) * 39.37 + Owner:GetVelocity(),
 		Direction = Dir,
 	})
+
+	-- A freshly spawned missile's first think waits for the default think interval, holding it at the muzzle for ~0.1 s
+	Missile:NextThink(CurTime())
 
 	if IsValid(Target) then Missile.GuidanceData.Target = Target end
 
