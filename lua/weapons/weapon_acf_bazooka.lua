@@ -1,5 +1,7 @@
 AddCSLuaFile()
 
+local Adapter = include("acf_sweps/acf_adapter.lua")
+
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Bazooka"
 
@@ -32,12 +34,21 @@ SWEP.Primary.Delay          = 0.2
 SWEP.CarrySpeedMul			= 0.6
 SWEP.UseHybrid				= false
 
+-- The 60mm M6 rocket of the M9A1 Bazooka, these only describe the warhead for the info panel
 SWEP.Caliber                = 60 -- mm diameter of bullet
 SWEP.ACFType                = "HEAT"
-SWEP.ACFMuzzleVel           = 80 -- m/s of bullet leaving the barrel
+SWEP.ACFMuzzleVel           = 82 -- m/s of bullet leaving the barrel
 SWEP.ACFProjLen				= 18.5
 SWEP.ACFPropMass			= 0.040291 -- kg of propellant
 SWEP.Tracer                 = 0
+
+-- Passed to Missiles.CreateSpec, defined in lua/acf/entities/missiles/acf_sweps_rockets.lua
+SWEP.Missile				= "ACF.Missiles.ShoulderFiredRocket.M6A3"
+SWEP.MissileAmmo			= "ACF.Ammunition.HEAT"
+SWEP.MissileAmmoData		= {LinerAngleRatio = 0.25} -- The rocket's own lengths are the real round, only the liner is picked here
+SWEP.MissileLaunchVel		= 0 -- The motor burns out in the tube, its boost is the whole muzzle velocity
+SWEP.MissileGuidance		= "ACF.Missiles.Guidance.Dumb"
+SWEP.MissileFuze			= {Type = "ACF.Missiles.Fuze.Contact"}
 
 SWEP.AimTable = {}
 SWEP.AimTable[1] = {IronPos = Vector(-3.83, -8, -0.4), IronAng = Angle(2.9, -0.5, 0),  PitchAdjust = -1.55, Text = "100yd"} -- 100yd
@@ -66,3 +77,36 @@ SWEP.Zoom					= 1.2
 SWEP.Recovery				= 0.5
 
 SWEP.RequiresAim			= true
+
+-- Server only, built once since every shot is the same missile
+function SWEP:GetMissileSpec()
+	local Spec = self.MissileSpec
+
+	if not Spec then
+		local Err
+
+		Spec, Err = Adapter.CreateMissileSpec({
+			Missile = self.Missile,
+			AmmoType = self.MissileAmmo,
+			Ammo = self.MissileAmmoData,
+			Guidance = {Type = self.MissileGuidance},
+			Fuze = self.MissileFuze,
+		})
+
+		if not Spec then ErrorNoHalt(self:GetClass() .. ": " .. Err .. "\n") return end
+
+		self.MissileSpec = Spec
+	end
+
+	return Spec
+end
+
+function SWEP:FireShots()
+	local Spec = self:GetMissileSpec()
+	if not Spec then return end
+
+	local Owner = self:GetOwner()
+	local Missile, Err = Adapter.FireMissile(self, Spec, Owner:GetShootPos(), self:GetShotDirections()[1], {Owner, self})
+
+	if not Missile and Err then ErrorNoHalt(self:GetClass() .. ": " .. Err .. "\n") end
+end
