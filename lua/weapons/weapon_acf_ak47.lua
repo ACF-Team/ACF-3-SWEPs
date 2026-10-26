@@ -2,6 +2,7 @@ AddCSLuaFile()
 
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF AK47"
+SWEP.SubCategory            = "Assault Rifles"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_rif_ak47.mdl"

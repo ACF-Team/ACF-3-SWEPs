@@ -2,6 +2,7 @@ AddCSLuaFile()
 
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Shotgun"
+SWEP.SubCategory            = "Shotguns"
 
 SWEP.UseHands               = true
 SWEP.ViewModel              = "models/weapons/cstrike/c_shot_m3super90.mdl"

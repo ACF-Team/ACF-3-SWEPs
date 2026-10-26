@@ -127,6 +127,108 @@ if CLIENT then
 
 	list.Set("ContentCategoryIcons", Category, "vgui/entities/acf_logo.png")
 
+	-- Groups the category's icons under bold section headers on the main node, and mirrors each as its own
+	-- child node, so a group can be browsed on its own instead of scrolling through the full list
+	local Groups = {
+		{"Assault Rifles", "icon16/gun.png"},
+		{"Sniper Rifles", "icon16/find.png"},
+		{"Machine Guns", "icon16/package.png"},
+		{"Submachine Guns", "icon16/wand.png"},
+		{"Pistols", "icon16/gun.png"},
+		{"Shotguns", "icon16/bomb.png"},
+		{"Anti Vehicle", "icon16/star.png"},
+	}
+
+	local function ItemsInGroup(GroupName)
+		local Items = {}
+
+		for ClassName, SWEP in pairs(list.Get("Weapon")) do
+			if SWEP.Category == Category and SWEP.SubCategory == GroupName then
+				Items[#Items + 1] = {ClassName = ClassName, SWEP = SWEP}
+			end
+		end
+
+		table.sort(Items, function(A, B)
+			return (A.SWEP.PrintName or A.ClassName) < (B.SWEP.PrintName or B.ClassName)
+		end)
+
+		return Items
+	end
+
+	local function BuildGroupedPanel(Content)
+		local Panel = vgui.Create("DScrollPanel", Content)
+		Panel:SetVisible(false)
+
+		for _, Group in ipairs(Groups) do
+			local GroupName = Group[1]
+			local Items = ItemsInGroup(GroupName)
+			if #Items > 0 then
+				local Header = Panel:Add("DLabel")
+				Header:Dock(TOP)
+				Header:DockMargin(4, #Panel:GetChildren() == 1 and 4 or 12, 4, 4)
+				Header:SetFont("ACF_Title")
+				Header:SetTextColor(color_white)
+				Header:SetText(GroupName)
+
+				local Layout = Panel:Add("DIconLayout")
+				Layout:Dock(TOP)
+				Layout:SetSpaceX(4)
+				Layout:SetSpaceY(4)
+
+				for _, Item in ipairs(Items) do
+					spawnmenu.CreateContentIcon(ContentType, Layout, {
+						nicename = Item.SWEP.PrintName or Item.ClassName,
+						spawnname = Item.ClassName,
+						material = Item.SWEP.IconOverride or "materials/vgui/entities/acf_logo.png",
+						admin = Item.SWEP.AdminOnly,
+					})
+				end
+			end
+		end
+
+		return Panel
+	end
+
+	local function GroupCategoryContent(Content, Tree)
+		local Root = Tree.Categories and Tree.Categories[Category]
+		if not IsValid(Root) then return end
+
+		function Root:DoPopulate()
+			if IsValid(self.PropPanel) then return end
+
+			self.PropPanel = BuildGroupedPanel(Content)
+		end
+
+		for _, Group in ipairs(Groups) do
+			local GroupName = Group[1]
+			local Node = Root:AddNode(GroupName, Group[2])
+
+			function Node:DoPopulate()
+				if IsValid(self.PropPanel) then return end
+
+				self.PropPanel = vgui.Create("ContentContainer", Content)
+				self.PropPanel:SetVisible(false)
+				self.PropPanel:SetTriggerSpawnlistChange(false)
+
+				for _, Item in ipairs(ItemsInGroup(GroupName)) do
+					spawnmenu.CreateContentIcon(ContentType, self.PropPanel, {
+						nicename = Item.SWEP.PrintName or Item.ClassName,
+						spawnname = Item.ClassName,
+						material = Item.SWEP.IconOverride or "materials/vgui/entities/acf_logo.png",
+						admin = Item.SWEP.AdminOnly,
+					})
+				end
+			end
+
+			function Node:DoClick()
+				self:DoPopulate()
+				Content:SwitchPanel(self.PropPanel)
+			end
+		end
+	end
+
+	hook.Add("PopulateWeapons", "ACF SWEPs Category Headers", GroupCategoryContent)
+
 	-- ACF sizes the flight model by caliber, which shrinks models like the crossbow bolt to nothing
 	hook.Add("ACF_OnCreateBulletEffect", "ACF SWEPs Bullet Model Scale", function(Effect, BulletData)
 		local Gun = BulletData.Crate

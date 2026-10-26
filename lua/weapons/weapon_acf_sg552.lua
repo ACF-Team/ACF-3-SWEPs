@@ -2,6 +2,7 @@ AddCSLuaFile()
 
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF SG552"
+SWEP.SubCategory            = "Assault Rifles"
 
 SWEP.IconOffset				= Vector(5, 4, -2)
 SWEP.IconAngOffset			= Angle()

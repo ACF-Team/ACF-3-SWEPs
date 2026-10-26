@@ -4,6 +4,7 @@ local Adapter = include("acf_sweps/acf_adapter.lua")
 
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF Panzerschreck"
+SWEP.SubCategory            = "Anti Vehicle"
 
 SWEP.IconOffset				= Vector(-2, -8, 0)
 SWEP.IconAngOffset			= Angle()

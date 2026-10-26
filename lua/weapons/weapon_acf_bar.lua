@@ -2,6 +2,7 @@ AddCSLuaFile()
 
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF M1918 BAR"
+SWEP.SubCategory            = "Machine Guns"
 
 SWEP.IconOffset				= Vector(-16, 0, 0)
 SWEP.IconAngOffset			= Angle()

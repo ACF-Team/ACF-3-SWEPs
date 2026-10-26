@@ -6,6 +6,7 @@ DEFINE_BASECLASS("weapon_acf_base")
 
 SWEP.Base                   = "weapon_acf_base"
 SWEP.PrintName              = "ACF FIM-92 Stinger"
+SWEP.SubCategory            = "Anti Vehicle"
 
 SWEP.IconOffset				= Vector(4, -4, 0)
 SWEP.IconAngOffset			= Angle()
