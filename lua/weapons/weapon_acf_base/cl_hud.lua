@@ -17,7 +17,7 @@ surface.CreateFont("SWEP-HUD-FONT", {
 local SM = {x = SX / 2, y = SY / 2}
 --local UU = (SX > SY) and (SY / 12) or (SX / 12)
 function SWEP:DoDrawCrosshair(x, y)
-	local AimMod = self:GetAimMod()
+	local AimMod = self:GetCrosshairAimMod()
 	local Spread = self.Spread
 	local SpreadAmt = Spread * AimMod
 	if self.CrosshairScale then SpreadAmt = math.max(self.CrosshairScale * AimMod, self.Spread) end

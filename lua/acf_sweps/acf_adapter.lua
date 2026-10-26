@@ -125,18 +125,28 @@ function Adapter.GetInaccuracyBias()
 	return ACF.GunInaccuracyBias
 end
 
--- Server only
-function Adapter.FireProjectile(Weapon, Bullet, Pos, Dir, Filter)
-	local Owner = Weapon:GetOwner()
+local function GetFlight(Weapon, Bullet, Dir)
+	return Dir * Bullet.MuzzleVel * 39.37 + Weapon:GetOwner():GetVelocity()
+end
 
-	Bullet.Owner = Owner
+-- Server only, with a PredictionID the owner's client fired the same projectile itself (Adapter.PredictProjectile)
+-- ACF then steps it on the owner's clock, lag compensated, and leaves the owner out of its effect
+function Adapter.FireProjectile(Weapon, Bullet, Pos, Dir, Filter, PredictionID)
+	Bullet.Owner = Weapon:GetOwner()
 	Bullet.Gun = Weapon
 	Bullet.Pos = Pos
 	Bullet.Filter = Filter
 	Bullet.Crate = Weapon:EntIndex()
-	Bullet.Flight = Dir * Bullet.MuzzleVel * 39.37 + Owner:GetVelocity()
+	Bullet.Flight = GetFlight(Weapon, Bullet, Dir)
+	Bullet.Predictable = PredictionID ~= nil
+	Bullet.PredictionID = PredictionID
 
 	GetAmmoType(Bullet.Type):Create(Weapon, Bullet)
+end
+
+-- Client only, the owner's copy of the projectile Adapter.FireProjectile fires with the same PredictionID
+function Adapter.PredictProjectile(Weapon, Bullet, Pos, Dir, PredictionID)
+	ACF.Ballistics.CreatePredictedBullet(PredictionID, Weapon, Pos, GetFlight(Weapon, Bullet, Dir), Bullet)
 end
 
 -- Server only, the missile a launcher fires, from ACF's own missile classes

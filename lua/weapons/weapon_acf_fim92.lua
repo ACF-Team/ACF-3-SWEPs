@@ -199,6 +199,10 @@ function SWEP:Holster()
 	return BaseClass.Holster(self)
 end
 
+-- Missiles aren't predicted, the client waits for the server's
+function SWEP:PredictShots()
+end
+
 function SWEP:FireShots()
 	local Spec = self:GetMissileSpec()
 	if not Spec then return end

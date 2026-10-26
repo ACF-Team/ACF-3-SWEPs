@@ -266,6 +266,12 @@ if SERVER then
 			resource.AddWorkshop("2923573966") -- ACF-3 SWEPs
 		end
 	end)
+
+	-- Our bullets are lag compensated, so vehicles have to be rewound for them too
+	-- Done once the baseplate entity is registered, which is after autorun
+	hook.Add("Initialize", "ACF SWEPs Baseplate Lag Compensation", function()
+		if ACF.SetBaseplateLagCompensation then ACF.SetBaseplateLagCompensation(true) end
+	end)
 end
 
 do
