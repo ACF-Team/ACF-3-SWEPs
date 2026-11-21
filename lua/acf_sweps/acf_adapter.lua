@@ -13,6 +13,9 @@ local function BuildKinetic(SWEP, Bullet)
 	Bullet.Ricochet = 60
 	Bullet.LimitVel = 800
 	Bullet.ShovePower = 0.2
+
+	-- APDS only penetrates with its core, here thats the whole projectile
+	if SWEP.ACFType == "APDS" then Bullet.CoreMass = SWEP.ACFProjMass end
 end
 
 local function BuildHE(SWEP, Bullet)
